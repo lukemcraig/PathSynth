@@ -57,7 +57,7 @@ public:
     void setStateInformation(const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    void setPath(const Path& path, int width, int height);
+    void setPath(const Path& path);
 
 private:
     Path nextProcessorPath{};

@@ -183,15 +183,9 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
     // whose contents will have been created by the getStateInformation() call.
 }
 
-void PathSynthAudioProcessor::setPath(const Path& path, int width, int height)
+void PathSynthAudioProcessor::setPath(const Path& path)
 {
-    Path newPath = path;
-    auto newPathBounds = newPath.getBounds();
-    newPath.applyTransform(
-        AffineTransform::translation(-newPathBounds.getCentreX(), -newPathBounds.getCentreY()).followedBy(
-            AffineTransform::scale(1.0f / newPathBounds.getWidth(), 1.0f / newPathBounds.getHeight())));
-    auto newPathBoundsScaled = newPath.getBounds();
-    nextProcessorPath = newPath;
+    nextProcessorPath = path;
 }
 
 //==============================================================================

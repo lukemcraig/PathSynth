@@ -31,6 +31,7 @@ private:
     std::vector<Point<float>> points;
     Path straightPath;
     Path smoothPath;
+    Path signalPath;
     bool pathChanged = true;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathSynthAudioProcessorEditor)

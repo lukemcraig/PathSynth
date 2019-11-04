@@ -35,7 +35,7 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
 
     setResizable(true, true);
     setResizeLimits(10, 10, 1000, 1000);
-    setSize(width, height);
+    setSize(width * 2, height);
 
     for (auto i = 0; i < controlPoints.size(); ++i)
     {
@@ -75,6 +75,8 @@ void PathSynthAudioProcessorEditor::paint(Graphics& g)
 
     g.strokePath(straightPath, PathStrokeType(1.0));
     g.strokePath(smoothPath, PathStrokeType(1.0));
+
+    g.strokePath(signalPath, PathStrokeType(1.0));
 }
 
 void PathSynthAudioProcessorEditor::resized()
@@ -109,7 +111,32 @@ void PathSynthAudioProcessorEditor::timerCallback()
 
         smoothPath = straightPath.createPathWithRoundedCorners(100.0f);
 
-        processor.setPath(smoothPath,getWidth(),getHeight());
+        Path newPath = smoothPath;
+        auto newPathBounds = newPath.getBounds();
+        newPath.applyTransform(
+            AffineTransform::translation(-newPathBounds.getCentreX(), -newPathBounds.getCentreY()).followedBy(
+                AffineTransform::scale(1.0f / newPathBounds.getWidth(), 1.0f / newPathBounds.getHeight())));
+        auto newPathBoundsScaled = newPath.getBounds();
+
+        {
+            const auto length = newPath.getLength();
+            float t = 0.0f;
+            signalPath.clear();
+
+            for (int i = 1; i <= 256; ++i)
+            {
+                t = static_cast<float>(i) / 256.0f;
+                const auto point = newPath.getPointAlongPath(length * t);
+                const auto pointValue = (point.getX() * 256.0f) + 256.0f;
+                if (i == 1)
+                    signalPath.startNewSubPath(512.0f, pointValue);
+                else
+                    signalPath.lineTo(512.0f + i, pointValue);
+            }
+            //signalPath.closeSubPath();
+        }
+
+        processor.setPath(newPath);
 
         repaint();
     }
