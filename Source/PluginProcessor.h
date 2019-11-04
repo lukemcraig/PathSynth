@@ -57,11 +57,11 @@ public:
     void setStateInformation(const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    void setPath(const Path& path);
+    void setPath(const Path& path, int width, int height);
 
 private:
     Path processorPath;
-    float t;
+    float t{};
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathSynthAudioProcessor)
 };

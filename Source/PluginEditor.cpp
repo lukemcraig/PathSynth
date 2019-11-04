@@ -108,7 +108,7 @@ void PathSynthAudioProcessorEditor::timerCallback()
 
         smoothPath = straightPath.createPathWithRoundedCorners(100.0f);
 
-        processor.setPath(smoothPath);
+        processor.setPath(smoothPath,getWidth(),getHeight());
 
         repaint();
     }

@@ -134,14 +134,27 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-    // float localT;
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    float localT;
+    const auto length = processorPath.getLength();
+    //DBG(length);
+    for (int channel = 0; channel < totalNumOutputChannels; ++channel)
     {
-        // localT = t;
+        localT = t;
         auto* channelData = buffer.getWritePointer(channel);
-        // ..do something to the data...
+        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+        {
+            const auto point = processorPath.getPointAlongPath(length * localT);
+            //DBG(point.getX());
+            channelData[sample] = point.getX();
+            localT += 0.01f;
+            DBG(localT);
+            if (localT >= 1.0f)
+            {
+                localT -= 1.0f;
+            }
+        }
     }
-    // t= localT;
+    t = localT;
 }
 
 //==============================================================================
@@ -169,9 +182,15 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
     // whose contents will have been created by the getStateInformation() call.
 }
 
-void PathSynthAudioProcessor::setPath(const Path& path)
+void PathSynthAudioProcessor::setPath(const Path& path, int width, int height)
 {
-    processorPath = path;
+    Path newPath = path;
+    auto newPathBounds = newPath.getBounds();
+    newPath.applyTransform(
+        AffineTransform::translation(-newPathBounds.getCentreX(), -newPathBounds.getCentreY()).followedBy(
+            AffineTransform::scale(1.0f / newPathBounds.getWidth(), 1.0f / newPathBounds.getHeight())));
+    auto newPathBoundsScaled = newPath.getBounds();
+    processorPath = newPath;
 }
 
 //==============================================================================
