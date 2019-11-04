@@ -4,14 +4,14 @@
 //==============================================================================
 PathSynthAudioProcessor::PathSynthAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", AudioChannelSet::stereo(), true)
-                     #endif
-                       )
+    : AudioProcessor(BusesProperties()
+#if ! JucePlugin_IsMidiEffect
+#if ! JucePlugin_IsSynth
+        .withInput("Input", AudioChannelSet::stereo(), true)
+#endif
+        .withOutput("Output", AudioChannelSet::stereo(), true)
+#endif
+    )
 #endif
 {
 }
@@ -28,29 +28,29 @@ const String PathSynthAudioProcessor::getName() const
 
 bool PathSynthAudioProcessor::acceptsMidi() const
 {
-   #if JucePlugin_WantsMidiInput
+#if JucePlugin_WantsMidiInput
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 bool PathSynthAudioProcessor::producesMidi() const
 {
-   #if JucePlugin_ProducesMidiOutput
+#if JucePlugin_ProducesMidiOutput
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 bool PathSynthAudioProcessor::isMidiEffect() const
 {
-   #if JucePlugin_IsMidiEffect
+#if JucePlugin_IsMidiEffect
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 double PathSynthAudioProcessor::getTailLengthSeconds() const
@@ -60,8 +60,8 @@ double PathSynthAudioProcessor::getTailLengthSeconds() const
 
 int PathSynthAudioProcessor::getNumPrograms()
 {
-    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                // so this should be at least 1, even if you're not really implementing programs.
+    return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
+    // so this should be at least 1, even if you're not really implementing programs.
 }
 
 int PathSynthAudioProcessor::getCurrentProgram()
@@ -69,21 +69,21 @@ int PathSynthAudioProcessor::getCurrentProgram()
     return 0;
 }
 
-void PathSynthAudioProcessor::setCurrentProgram (int index)
+void PathSynthAudioProcessor::setCurrentProgram(int index)
 {
 }
 
-const String PathSynthAudioProcessor::getProgramName (int index)
+const String PathSynthAudioProcessor::getProgramName(int index)
 {
     return {};
 }
 
-void PathSynthAudioProcessor::changeProgramName (int index, const String& newName)
+void PathSynthAudioProcessor::changeProgramName(int index, const String& newName)
 {
 }
 
 //==============================================================================
-void PathSynthAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void PathSynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
@@ -96,33 +96,33 @@ void PathSynthAudioProcessor::releaseResources()
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool PathSynthAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool PathSynthAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
 {
-  #if JucePlugin_IsMidiEffect
+#if JucePlugin_IsMidiEffect
     ignoreUnused (layouts);
     return true;
-  #else
+#else
     // This is the place where you check if the layout is supported.
     // In this template code we only support mono or stereo.
     if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()
-     && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
+        && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
         return false;
 
     // This checks if the input layout matches the output layout
-   #if ! JucePlugin_IsSynth
+#if ! JucePlugin_IsSynth
     if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
         return false;
-   #endif
+#endif
 
     return true;
-  #endif
+#endif
 }
 #endif
 
-void PathSynthAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
+void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
     ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
+    auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
     // In case we have more outputs than inputs, this code clears any output
@@ -132,20 +132,16 @@ void PathSynthAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuff
     // when they first compile a plugin, but obviously you don't need to keep
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
+        buffer.clear(i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
+    // float localT;
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
-        auto* channelData = buffer.getWritePointer (channel);
-
+        // localT = t;
+        auto* channelData = buffer.getWritePointer(channel);
         // ..do something to the data...
     }
+    // t= localT;
 }
 
 //==============================================================================
@@ -156,18 +152,18 @@ bool PathSynthAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* PathSynthAudioProcessor::createEditor()
 {
-    return new PathSynthAudioProcessorEditor (*this);
+    return new PathSynthAudioProcessorEditor(*this);
 }
 
 //==============================================================================
-void PathSynthAudioProcessor::getStateInformation (MemoryBlock& destData)
+void PathSynthAudioProcessor::getStateInformation(MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
 }
 
-void PathSynthAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
