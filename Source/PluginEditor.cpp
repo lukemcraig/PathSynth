@@ -46,7 +46,7 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
         auto y = points[i].getY() - 5.0f;
         controlPoints[i]->setBounds(x, y, 10.0f, 10.0f);
     }
-    startTimer(100);
+    startTimer(25);
 }
 
 PathSynthAudioProcessorEditor::~PathSynthAudioProcessorEditor()
@@ -117,15 +117,15 @@ void PathSynthAudioProcessorEditor::timerCallback()
             float t = 0.0f;
             signalPath.clear();
 
-            for (int i = 1; i <= 500; ++i)
+            for (int i = 1; i <= 1000; ++i)
             {
-                t = static_cast<float>(i) / 500.0f;
+                t = static_cast<float>(i) / 1000.0f;
                 const auto point = newPath.getPointAlongPath(length * t);
                 const auto pointValue = (point.getX() * 256.0f) + 256.0f;
                 if (i == 1)
                     signalPath.startNewSubPath(512.0f, pointValue);
                 else
-                    signalPath.lineTo(512.0f + i, pointValue);
+                    signalPath.lineTo(512.0f + (i * 0.5f), pointValue);
             }
         }
 
