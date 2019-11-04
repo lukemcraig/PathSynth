@@ -147,7 +147,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
             //DBG(point.getX());
             channelData[sample] = point.getX();
             localT += 0.01f;
-            DBG(localT);
+            //DBG(localT);
             if (localT >= 1.0f)
             {
                 localT -= 1.0f;
