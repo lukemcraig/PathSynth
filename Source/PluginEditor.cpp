@@ -39,8 +39,6 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
         addAndMakeVisible(controlPoint.get());
     }
 
-   /* setResizable(true, true);
-    setResizeLimits(10, 10, 1000, 1000);*/
     setSize(width * 2, height);
 
     for (auto i = 0; i < controlPoints.size(); ++i)
@@ -85,7 +83,7 @@ void PathSynthAudioProcessorEditor::resized()
 void PathSynthAudioProcessorEditor::timerCallback()
 {
     const auto smoothing = *parameters.getRawParameterValue("smoothing");
-    if (pathChanged || lastSmoothing != smoothing)
+    if (pathChanged || lastSmoothing != smoothing || processorWasBusy)
     {
         pathChanged = false;
         lastSmoothing = smoothing;
@@ -116,7 +114,7 @@ void PathSynthAudioProcessorEditor::timerCallback()
             auto newPathBoundsScaled = newPath.getBounds();
         }
 
-        processor.setPath(newPath);
+        processorWasBusy = !processor.setPath(newPath);
 
         {
             const auto length = newPath.getLength();

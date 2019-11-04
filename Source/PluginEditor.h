@@ -43,6 +43,7 @@ private:
     Path signalPath;
     bool pathChanged = true;
     float lastSmoothing = 0.0f;
+    bool processorWasBusy = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathSynthAudioProcessorEditor)
 };

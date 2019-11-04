@@ -3,7 +3,7 @@
 
 AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
-    std::vector<std::unique_ptr<AudioParameterFloat>> params;
+    std::vector<std::unique_ptr<RangedAudioParameter>> params;
     params.push_back(std::make_unique<AudioParameterFloat>("frequency",
                                                            "Frequency",
                                                            NormalisableRange<float>(1.0f,
@@ -20,6 +20,10 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                                                     0.9f,
                                                                                     false),
                                                            100.0f));
+    params.push_back(std::make_unique<AudioParameterChoice>("direction",
+                                                            "Direction",
+                                                            StringArray{"X", "Y"},
+                                                            0));
     return {params.begin(), params.end()};
 }
 
@@ -150,11 +154,15 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     auto* channelData = buffer.getWritePointer(0);
     for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
     {
-        if (readyToChangePath)
+        if (!guiUpdatingPath)
         {
-            readyToChangePath = false;
-            processorPath = nextProcessorPath;
-            readyToChangePath = true;
+            processorUpdatingPath = true;
+            if (processorNeedNewPath)
+            {
+                processorPath = nextProcessorPath;
+                processorNeedNewPath = false;
+            }
+            processorUpdatingPath = false;
         }
 
         const auto length = processorPath.getLength();
@@ -199,14 +207,18 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
     // whose contents will have been created by the getStateInformation() call.
 }
 
-void PathSynthAudioProcessor::setPath(const Path& path)
+bool PathSynthAudioProcessor::setPath(const Path& path)
 {
-    if (readyToChangePath)
+    // if the audio thread is copying from the last nextProcessorPath, this new path will get skipped but that's ok.
+    if (!processorUpdatingPath)
     {
-        readyToChangePath = false;
+        guiUpdatingPath = true;
         nextProcessorPath = path;
-        readyToChangePath = true;
+        processorNeedNewPath = true;
+        guiUpdatingPath = false;
+        return true;
     }
+    return false;
 }
 
 //==============================================================================
