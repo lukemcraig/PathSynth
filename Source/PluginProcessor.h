@@ -60,7 +60,8 @@ public:
     void setPath(const Path& path, int width, int height);
 
 private:
-    Path processorPath;
+    Path nextProcessorPath{};
+    Path processorPath{};
     float t{};
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathSynthAudioProcessor)

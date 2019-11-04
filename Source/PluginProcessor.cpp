@@ -134,6 +134,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
+    processorPath = nextProcessorPath;
     float localT;
     const auto length = processorPath.getLength();
     //DBG(length);
@@ -190,7 +191,7 @@ void PathSynthAudioProcessor::setPath(const Path& path, int width, int height)
         AffineTransform::translation(-newPathBounds.getCentreX(), -newPathBounds.getCentreY()).followedBy(
             AffineTransform::scale(1.0f / newPathBounds.getWidth(), 1.0f / newPathBounds.getHeight())));
     auto newPathBoundsScaled = newPath.getBounds();
-    processorPath = newPath;
+    nextProcessorPath = newPath;
 }
 
 //==============================================================================

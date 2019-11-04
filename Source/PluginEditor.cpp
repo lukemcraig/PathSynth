@@ -104,7 +104,8 @@ void PathSynthAudioProcessorEditor::timerCallback()
             pointPos.setY(pointPos.y + controlPoints[i]->getHeight() * 0.5f);
             straightPath.lineTo(pointPos);
         }
-        straightPath.lineTo(firstPointPos);
+        straightPath.closeSubPath();
+        //straightPath.lineTo(firstPointPos);
 
         smoothPath = straightPath.createPathWithRoundedCorners(100.0f);
 
