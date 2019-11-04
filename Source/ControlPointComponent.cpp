@@ -12,7 +12,7 @@
 #include "ControlPointComponent.h"
 
 //==============================================================================
-ControlPointComponent::ControlPointComponent()
+ControlPointComponent::ControlPointComponent(bool& pathChanged) : pathChanged(pathChanged)
 {
 }
 
@@ -37,4 +37,5 @@ void ControlPointComponent::mouseDown(const MouseEvent& event)
 void ControlPointComponent::mouseDrag(const MouseEvent& event)
 {
     dragger.dragComponent(this, event, nullptr);
+    pathChanged = true;
 }

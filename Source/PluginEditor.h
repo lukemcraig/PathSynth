@@ -30,7 +30,8 @@ private:
     std::vector<std::unique_ptr<ControlPointComponent>> controlPoints;
     std::vector<Point<float>> points;
     Path straightPath;
-    Path guiPath;
+    Path smoothPath;
+    bool pathChanged = true;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathSynthAudioProcessorEditor)
 };

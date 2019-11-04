@@ -18,7 +18,7 @@
 class ControlPointComponent : public Component
 {
 public:
-    ControlPointComponent();
+    ControlPointComponent(bool&);
 
     ~ControlPointComponent();
 
@@ -32,5 +32,6 @@ public:
 
 private:
     ComponentDragger dragger;
+    bool& pathChanged;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlPointComponent)
 };

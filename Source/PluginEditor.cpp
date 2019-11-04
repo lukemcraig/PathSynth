@@ -25,7 +25,7 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     for (auto&& point : points)
     {
         point.applyTransform(transform);
-        controlPoints.emplace_back(std::make_unique<ControlPointComponent>());
+        controlPoints.emplace_back(std::make_unique<ControlPointComponent>(pathChanged));
     }
 
     for (auto&& controlPoint : controlPoints)
@@ -61,20 +61,6 @@ void PathSynthAudioProcessorEditor::paint(Graphics& g)
     //}
     //guiPath = straightPath.createPathWithRoundedCorners(100.0f);
 
-    straightPath.clear();
-
-    const auto firstPointPos = controlPoints[0]->getPosition().toFloat();
-    straightPath.startNewSubPath(firstPointPos);
-
-    for (auto i = 1; i < controlPoints.size(); ++i)
-    {
-        const auto pointPos = controlPoints[i]->getPosition().toFloat();
-        straightPath.lineTo(pointPos);
-    }
-    straightPath.lineTo(firstPointPos);
-
-    guiPath = straightPath.createPathWithRoundedCorners(100.0f);
-
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 
@@ -88,7 +74,7 @@ void PathSynthAudioProcessorEditor::paint(Graphics& g)
     //}
 
     g.strokePath(straightPath, PathStrokeType(1.0));
-    g.strokePath(guiPath, PathStrokeType(1.0));
+    g.strokePath(smoothPath, PathStrokeType(1.0));
 }
 
 void PathSynthAudioProcessorEditor::resized()
@@ -101,5 +87,22 @@ void PathSynthAudioProcessorEditor::resized()
 
 void PathSynthAudioProcessorEditor::timerCallback()
 {
-    repaint();
+    if (pathChanged)
+    {
+        pathChanged=false;
+        straightPath.clear();
+
+        const auto firstPointPos = controlPoints[0]->getPosition().toFloat();
+        straightPath.startNewSubPath(firstPointPos);
+
+        for (auto i = 1; i < controlPoints.size(); ++i)
+        {
+            const auto pointPos = controlPoints[i]->getPosition().toFloat();
+            straightPath.lineTo(pointPos);
+        }
+        straightPath.lineTo(firstPointPos);
+
+        smoothPath = straightPath.createPathWithRoundedCorners(100.0f);
+        repaint();
+    }
 }
