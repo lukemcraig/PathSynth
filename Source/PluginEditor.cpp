@@ -12,14 +12,17 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     addAndMakeVisible(frequencySlider);
     frequencyAttachment.reset(new SliderAttachment(parameters, "frequency", frequencySlider));
 
-    points.emplace_back(2.5f, 4.0f);
-    points.emplace_back(0.0f, 1.0f);
-    points.emplace_back(-2.5f, 4.0f);
-    points.emplace_back(-3.0f, 0.0f);
-    points.emplace_back(-2.5f, -4.0f);
-    points.emplace_back(0.0f, -1.0f);
-    points.emplace_back(2.5f, -4.0f);
-    points.emplace_back(3.0f, 0.0f);;
+    addAndMakeVisible(smoothSlider);
+    smoothAttachment.reset(new SliderAttachment(parameters, "smoothing", smoothSlider));
+
+    points.emplace_back(2.5f, 2.5f);
+    points.emplace_back(0.0f, 5.0f);
+    points.emplace_back(-2.5f, 2.5f);
+    points.emplace_back(-5.0f, 0.0f);
+    points.emplace_back(-2.5f, -2.5f);
+    points.emplace_back(0.0f, -5.0f);
+    points.emplace_back(2.5f, -2.5f);
+    points.emplace_back(5.0f, 0.0f);;
 
     const auto halfWidth = 0.5f * width;
     const auto halfHeight = 0.5f * height;
@@ -36,8 +39,8 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
         addAndMakeVisible(controlPoint.get());
     }
 
-    setResizable(true, true);
-    setResizeLimits(10, 10, 1000, 1000);
+   /* setResizable(true, true);
+    setResizeLimits(10, 10, 1000, 1000);*/
     setSize(width * 2, height);
 
     for (auto i = 0; i < controlPoints.size(); ++i)
@@ -75,14 +78,17 @@ void PathSynthAudioProcessorEditor::paint(Graphics& g)
 void PathSynthAudioProcessorEditor::resized()
 {
     auto bounds = getBounds();
+    smoothSlider.setBounds(bounds.removeFromBottom(20));
     frequencySlider.setBounds(bounds.removeFromBottom(20));
 }
 
 void PathSynthAudioProcessorEditor::timerCallback()
 {
-    if (pathChanged)
+    const auto smoothing = *parameters.getRawParameterValue("smoothing");
+    if (pathChanged || lastSmoothing != smoothing)
     {
         pathChanged = false;
+        lastSmoothing = smoothing;
         straightPath.clear();
 
         auto firstPointPos = controlPoints[0]->getPosition().toFloat();
@@ -99,7 +105,7 @@ void PathSynthAudioProcessorEditor::timerCallback()
         }
         straightPath.closeSubPath();
 
-        smoothPath = straightPath.createPathWithRoundedCorners(100.0f);
+        smoothPath = straightPath.createPathWithRoundedCorners(smoothing);
 
         Path newPath = smoothPath;
         {

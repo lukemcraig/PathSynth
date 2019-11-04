@@ -12,6 +12,14 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                                                     0.5f,
                                                                                     false),
                                                            100.0f));
+    params.push_back(std::make_unique<AudioParameterFloat>("smoothing",
+                                                           "Smoothing",
+                                                           NormalisableRange<float>(0.0f,
+                                                                                    200.0f,
+                                                                                    0.0f,
+                                                                                    0.9f,
+                                                                                    false),
+                                                           100.0f));
     return {params.begin(), params.end()};
 }
 
