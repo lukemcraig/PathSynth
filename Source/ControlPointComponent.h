@@ -26,14 +26,9 @@ public:
 
     void resized() override;
 
-       void mouseDown(const MouseEvent& event) override
-   { 
-        dragger.startDraggingComponent(this, event);
-   }
-   void mouseDrag(const MouseEvent& event) override
-   {
-        dragger.dragComponent(this, event, nullptr);
-   }
+    void mouseDown(const MouseEvent& event) override;
+
+    void mouseDrag(const MouseEvent& event) override;
 
 private:
     ComponentDragger dragger;

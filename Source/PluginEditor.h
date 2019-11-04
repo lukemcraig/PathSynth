@@ -7,7 +7,8 @@
 //==============================================================================
 /**
 */
-class PathSynthAudioProcessorEditor : public AudioProcessorEditor
+class PathSynthAudioProcessorEditor : public AudioProcessorEditor,
+                                      public Timer
 {
 public:
     PathSynthAudioProcessorEditor(PathSynthAudioProcessor&);
@@ -18,6 +19,8 @@ public:
     void paint(Graphics&) override;
 
     void resized() override;
+
+    void timerCallback() override;
 
 private:
     // This reference is provided as a quick way for your editor to
