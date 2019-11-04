@@ -6,7 +6,11 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     std::vector<std::unique_ptr<AudioParameterFloat>> params;
     params.push_back(std::make_unique<AudioParameterFloat>("frequency",
                                                            "Frequency",
-                                                           NormalisableRange<float>(1.0f, 20000.0f, 0.0f, 0.5f, false),
+                                                           NormalisableRange<float>(1.0f,
+                                                                                    20000.0f,
+                                                                                    0.0f,
+                                                                                    0.5f,
+                                                                                    false),
                                                            100.0f));
     return {params.begin(), params.end()};
 }
@@ -16,7 +20,10 @@ PathSynthAudioProcessor::PathSynthAudioProcessor(): AudioProcessor(
                                                         BusesProperties().withOutput("Output",
                                                                                      AudioChannelSet::stereo(),
                                                                                      true)),
-                                                    parameters(*this, nullptr, "PathSynth", createParameterLayout())
+                                                    parameters(*this,
+                                                               nullptr,
+                                                               "PathSynth",
+                                                               createParameterLayout())
 
 {
 }

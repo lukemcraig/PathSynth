@@ -2,16 +2,17 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProcessor& p, AudioProcessorValueTreeState& apvts)
+PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProcessor& p,
+                                                             AudioProcessorValueTreeState& apvts)
     : AudioProcessorEditor(&p), processor(p), parameters(apvts)
 {
     auto width = 512;
     auto height = 512;
 
     addAndMakeVisible(frequencySlider);
-    frequencyAttachment.reset (new SliderAttachment (parameters, "frequency", frequencySlider));
+    frequencyAttachment.reset(new SliderAttachment(parameters, "frequency", frequencySlider));
 
-    points.emplace_back(3.0f, 1.0f);
+    //points.emplace_back(3.0f, 1.0f);
     points.emplace_back(2.5f, 4.0f);
     points.emplace_back(0.0f, 1.0f);
     points.emplace_back(-2.5f, 4.0f);
@@ -19,7 +20,8 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     points.emplace_back(-2.5f, -4.0f);
     points.emplace_back(0.0f, -1.0f);
     points.emplace_back(2.5f, -4.0f);
-    points.emplace_back(3.0f, -1.0f);
+    points.emplace_back(3.0f, 0.0f);
+    //points.emplace_back(3.0f, -1.0f);
 
     const auto halfWidth = 0.5f * width;
     const auto halfHeight = 0.5f * height;
