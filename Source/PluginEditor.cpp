@@ -12,7 +12,6 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     addAndMakeVisible(frequencySlider);
     frequencyAttachment.reset(new SliderAttachment(parameters, "frequency", frequencySlider));
 
-    //points.emplace_back(3.0f, 1.0f);
     points.emplace_back(2.5f, 4.0f);
     points.emplace_back(0.0f, 1.0f);
     points.emplace_back(-2.5f, 4.0f);
@@ -20,8 +19,7 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     points.emplace_back(-2.5f, -4.0f);
     points.emplace_back(0.0f, -1.0f);
     points.emplace_back(2.5f, -4.0f);
-    points.emplace_back(3.0f, 0.0f);
-    //points.emplace_back(3.0f, -1.0f);
+    points.emplace_back(3.0f, 0.0f);;
 
     const auto halfWidth = 0.5f * width;
     const auto halfHeight = 0.5f * height;
@@ -58,25 +56,11 @@ PathSynthAudioProcessorEditor::~PathSynthAudioProcessorEditor()
 //==============================================================================
 void PathSynthAudioProcessorEditor::paint(Graphics& g)
 {
-    //straightPath.clear();
-    //straightPath.startNewSubPath(points[0]);
-    //for (auto&& point : points)
-    //{
-    //    straightPath.lineTo(point);
-    //}
-    //guiPath = straightPath.createPathWithRoundedCorners(100.0f);
-
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 
     g.setColour(Colours::white);
-    //g.setFont(15.0f);
-    //g.drawFittedText("Hello World!", getLocalBounds(), Justification::centred, 1);
 
-    //for (auto&& point : points)
-    //{
-    //    g.drawEllipse(point.getX() - 2.5f, point.getY() - 2.5f, 5.0f, 5.0f, 1.0f);
-    //}
     g.drawLine(12.0f, 256.0f, 500.0f, 256.0f);
     g.drawLine(256.0f, 12.0f, 256.0f, 500.0f);
 

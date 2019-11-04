@@ -64,6 +64,7 @@ private:
     Path nextProcessorPath{};
     Path processorPath{};
     float t{};
+    std::atomic<bool> readyToChangePath = true;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathSynthAudioProcessor)
 };

@@ -134,41 +134,36 @@ bool PathSynthAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts)
 void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
     ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear(i, 0, buffer.getNumSamples());
-
-    processorPath = nextProcessorPath;
-    float localT;
-    const auto length = processorPath.getLength();
     const auto frequency = *parameters.getRawParameterValue("frequency");
     const auto phaseIncrement = frequency / getSampleRate();
-    for (int channel = 0; channel < totalNumOutputChannels; ++channel)
+
+    auto* channelData = buffer.getWritePointer(0);
+    for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
     {
-        localT = t;
-        auto* channelData = buffer.getWritePointer(channel);
-        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+        if (readyToChangePath)
         {
-            const auto point = processorPath.getPointAlongPath(length * localT);
+            readyToChangePath = false;
+            processorPath = nextProcessorPath;
+            readyToChangePath = true;
+        }
 
-            channelData[sample] = point.getX();
-            localT += phaseIncrement;
+        const auto length = processorPath.getLength();
 
-            if (localT >= 1.0f)
-            {
-                localT -= 1.0f;
-            }
+        const auto point = processorPath.getPointAlongPath(length * t);
+
+        channelData[sample] = point.getX();
+        t += phaseIncrement;
+
+        if (t >= 1.0f)
+        {
+            t -= 1.0f;
         }
     }
-    t = localT;
+
+    for (auto i = 1; i < totalNumOutputChannels; ++i)
+        buffer.copyFrom(i, 0, buffer, 0, 0, buffer.getNumSamples());
 }
 
 //==============================================================================
@@ -198,7 +193,12 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
 
 void PathSynthAudioProcessor::setPath(const Path& path)
 {
-    nextProcessorPath = path;
+    if (readyToChangePath)
+    {
+        readyToChangePath = false;
+        nextProcessorPath = path;
+        readyToChangePath = true;
+    }
 }
 
 //==============================================================================
