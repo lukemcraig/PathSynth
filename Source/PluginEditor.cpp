@@ -2,11 +2,14 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProcessor& p)
-    : AudioProcessorEditor(&p), processor(p)
+PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProcessor& p, AudioProcessorValueTreeState& apvts)
+    : AudioProcessorEditor(&p), processor(p), parameters(apvts)
 {
     auto width = 512;
     auto height = 512;
+
+    addAndMakeVisible(frequencySlider);
+    frequencyAttachment.reset (new SliderAttachment (parameters, "frequency", frequencySlider));
 
     points.emplace_back(3.0f, 1.0f);
     points.emplace_back(2.5f, 4.0f);
@@ -72,19 +75,21 @@ void PathSynthAudioProcessorEditor::paint(Graphics& g)
     //{
     //    g.drawEllipse(point.getX() - 2.5f, point.getY() - 2.5f, 5.0f, 5.0f, 1.0f);
     //}
+    g.drawLine(12.0f, 256.0f, 500.0f, 256.0f);
+    g.drawLine(256.0f, 12.0f, 256.0f, 500.0f);
 
     g.strokePath(straightPath, PathStrokeType(1.0));
     g.strokePath(smoothPath, PathStrokeType(1.0));
 
     g.strokePath(signalPath, PathStrokeType(1.0));
+
+    g.drawLine(512.0f, 256.0f, 1012.0f, 256.0f);
 }
 
 void PathSynthAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
-
-    //controlPoint.setBounds(getBounds().removeFromTop(100));
+    auto bounds = getBounds();
+    frequencySlider.setBounds(bounds.removeFromBottom(20));
 }
 
 void PathSynthAudioProcessorEditor::timerCallback()
@@ -107,25 +112,28 @@ void PathSynthAudioProcessorEditor::timerCallback()
             straightPath.lineTo(pointPos);
         }
         straightPath.closeSubPath();
-        //straightPath.lineTo(firstPointPos);
 
         smoothPath = straightPath.createPathWithRoundedCorners(100.0f);
 
         Path newPath = smoothPath;
-        auto newPathBounds = newPath.getBounds();
-        newPath.applyTransform(
-            AffineTransform::translation(-newPathBounds.getCentreX(), -newPathBounds.getCentreY()).followedBy(
-                AffineTransform::scale(1.0f / newPathBounds.getWidth(), 1.0f / newPathBounds.getHeight())));
-        auto newPathBoundsScaled = newPath.getBounds();
+        {
+            auto newPathBounds = newPath.getBounds();
+            newPath.applyTransform(
+                AffineTransform::translation(-newPathBounds.getCentreX(), -newPathBounds.getCentreY()).followedBy(
+                    AffineTransform::scale(1.0f / newPathBounds.getWidth(), 1.0f / newPathBounds.getHeight())));
+            auto newPathBoundsScaled = newPath.getBounds();
+        }
+
+        processor.setPath(newPath);
 
         {
             const auto length = newPath.getLength();
             float t = 0.0f;
             signalPath.clear();
 
-            for (int i = 1; i <= 256; ++i)
+            for (int i = 1; i <= 500; ++i)
             {
-                t = static_cast<float>(i) / 256.0f;
+                t = static_cast<float>(i) / 500.0f;
                 const auto point = newPath.getPointAlongPath(length * t);
                 const auto pointValue = (point.getX() * 256.0f) + 256.0f;
                 if (i == 1)
@@ -133,10 +141,7 @@ void PathSynthAudioProcessorEditor::timerCallback()
                 else
                     signalPath.lineTo(512.0f + i, pointValue);
             }
-            //signalPath.closeSubPath();
         }
-
-        processor.setPath(newPath);
 
         repaint();
     }

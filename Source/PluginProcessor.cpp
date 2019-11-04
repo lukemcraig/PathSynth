@@ -1,18 +1,23 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+{
+    std::vector<std::unique_ptr<AudioParameterFloat>> params;
+    params.push_back(std::make_unique<AudioParameterFloat>("frequency",
+                                                           "Frequency",
+                                                           NormalisableRange<float>(1.0f, 20000.0f, 0.0f, 0.5f, false),
+                                                           100.0f));
+    return {params.begin(), params.end()};
+}
+
 //==============================================================================
-PathSynthAudioProcessor::PathSynthAudioProcessor()
-#ifndef JucePlugin_PreferredChannelConfigurations
-    : AudioProcessor(BusesProperties()
-#if ! JucePlugin_IsMidiEffect
-#if ! JucePlugin_IsSynth
-        .withInput("Input", AudioChannelSet::stereo(), true)
-#endif
-        .withOutput("Output", AudioChannelSet::stereo(), true)
-#endif
-    )
-#endif
+PathSynthAudioProcessor::PathSynthAudioProcessor(): AudioProcessor(
+                                                        BusesProperties().withOutput("Output",
+                                                                                     AudioChannelSet::stereo(),
+                                                                                     true)),
+                                                    parameters(*this, nullptr, "PathSynth", createParameterLayout())
+
 {
 }
 
@@ -137,7 +142,8 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     processorPath = nextProcessorPath;
     float localT;
     const auto length = processorPath.getLength();
-    //DBG(length);
+    const auto frequency = *parameters.getRawParameterValue("frequency");
+    const auto phaseIncrement = frequency / getSampleRate();
     for (int channel = 0; channel < totalNumOutputChannels; ++channel)
     {
         localT = t;
@@ -145,10 +151,10 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
         for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
         {
             const auto point = processorPath.getPointAlongPath(length * localT);
-            //DBG(point.getX());
+
             channelData[sample] = point.getX();
-            localT += 0.01f;
-            //DBG(localT);
+            localT += phaseIncrement;
+
             if (localT >= 1.0f)
             {
                 localT -= 1.0f;
@@ -166,7 +172,7 @@ bool PathSynthAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* PathSynthAudioProcessor::createEditor()
 {
-    return new PathSynthAudioProcessorEditor(*this);
+    return new PathSynthAudioProcessorEditor(*this, parameters);
 }
 
 //==============================================================================

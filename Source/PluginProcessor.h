@@ -60,6 +60,7 @@ public:
     void setPath(const Path& path);
 
 private:
+    AudioProcessorValueTreeState parameters;
     Path nextProcessorPath{};
     Path processorPath{};
     float t{};

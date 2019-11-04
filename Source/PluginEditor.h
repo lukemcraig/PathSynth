@@ -11,7 +11,7 @@ class PathSynthAudioProcessorEditor : public AudioProcessorEditor,
                                       public Timer
 {
 public:
-    PathSynthAudioProcessorEditor(PathSynthAudioProcessor&);
+    PathSynthAudioProcessorEditor(PathSynthAudioProcessor&,AudioProcessorValueTreeState&);
 
     ~PathSynthAudioProcessorEditor();
 
@@ -23,9 +23,15 @@ public:
     void timerCallback() override;
 
 private:
+    typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
+
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     PathSynthAudioProcessor& processor;
+    AudioProcessorValueTreeState& parameters;
+
+    Slider frequencySlider;
+    std::unique_ptr<SliderAttachment> frequencyAttachment;
 
     std::vector<std::unique_ptr<ControlPointComponent>> controlPoints;
     std::vector<Point<float>> points;
