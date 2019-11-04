@@ -173,6 +173,11 @@ void PathSynthAudioProcessor::setStateInformation (const void* data, int sizeInB
     // whose contents will have been created by the getStateInformation() call.
 }
 
+void PathSynthAudioProcessor::setPath(const Path& path)
+{
+    processorPath = path;
+}
+
 //==============================================================================
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()

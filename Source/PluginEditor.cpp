@@ -39,9 +39,9 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
 
     for (auto i = 0; i < controlPoints.size(); ++i)
     {
-        auto x = points[i].getX() - 2.5f;
-        auto y = points[i].getY() - 2.5f;
-        controlPoints[i]->setBounds(x, y, 5.0f, 5.0f);
+        auto x = points[i].getX() - 5.0f;
+        auto y = points[i].getY() - 5.0f;
+        controlPoints[i]->setBounds(x, y, 10.0f, 10.0f);
     }
     startTimer(100);
 }
@@ -89,20 +89,27 @@ void PathSynthAudioProcessorEditor::timerCallback()
 {
     if (pathChanged)
     {
-        pathChanged=false;
+        pathChanged = false;
         straightPath.clear();
 
-        const auto firstPointPos = controlPoints[0]->getPosition().toFloat();
+        auto firstPointPos = controlPoints[0]->getPosition().toFloat();
+        firstPointPos.setX(firstPointPos.x + controlPoints[0]->getWidth() * 0.5f);
+        firstPointPos.setY(firstPointPos.y + controlPoints[0]->getHeight() * 0.5f);
         straightPath.startNewSubPath(firstPointPos);
 
         for (auto i = 1; i < controlPoints.size(); ++i)
         {
-            const auto pointPos = controlPoints[i]->getPosition().toFloat();
+            auto pointPos = controlPoints[i]->getPosition().toFloat();
+            pointPos.setX(pointPos.x + controlPoints[i]->getWidth() * 0.5f);
+            pointPos.setY(pointPos.y + controlPoints[i]->getHeight() * 0.5f);
             straightPath.lineTo(pointPos);
         }
         straightPath.lineTo(firstPointPos);
 
         smoothPath = straightPath.createPathWithRoundedCorners(100.0f);
+
+        processor.setPath(smoothPath);
+
         repaint();
     }
 }
