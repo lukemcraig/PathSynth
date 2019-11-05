@@ -15,6 +15,11 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     addAndMakeVisible(smoothSlider);
     smoothAttachment.reset(new SliderAttachment(parameters, "smoothing", smoothSlider));
 
+    addAndMakeVisible(directionBox);
+    directionBox.addItem("X", 1);
+    directionBox.addItem("Y", 2);
+    directionAttachment.reset(new ComboBoxAttachment(parameters, "direction", directionBox));
+
     points.emplace_back(2.5f, 2.5f);
     points.emplace_back(0.0f, 5.0f);
     points.emplace_back(-2.5f, 2.5f);
@@ -76,6 +81,7 @@ void PathSynthAudioProcessorEditor::paint(Graphics& g)
 void PathSynthAudioProcessorEditor::resized()
 {
     auto bounds = getBounds();
+    directionBox.setBounds(bounds.removeFromBottom(20));
     smoothSlider.setBounds(bounds.removeFromBottom(20));
     frequencySlider.setBounds(bounds.removeFromBottom(20));
 }
@@ -83,10 +89,12 @@ void PathSynthAudioProcessorEditor::resized()
 void PathSynthAudioProcessorEditor::timerCallback()
 {
     const auto smoothing = *parameters.getRawParameterValue("smoothing");
-    if (pathChanged || lastSmoothing != smoothing || processorWasBusy)
+    auto direction = *parameters.getRawParameterValue("direction");
+    if (pathChanged || lastSmoothing != smoothing || lastDirection != direction || processorWasBusy)
     {
         pathChanged = false;
         lastSmoothing = smoothing;
+        lastDirection = direction;
         straightPath.clear();
 
         auto firstPointPos = controlPoints[0]->getPosition().toFloat();
@@ -125,7 +133,12 @@ void PathSynthAudioProcessorEditor::timerCallback()
             {
                 t = static_cast<float>(i) / 1000.0f;
                 const auto point = newPath.getPointAlongPath(length * t);
-                const auto pointValue = (point.getX() * 256.0f) + 256.0f;
+                float pointValue;
+                if (direction == 0)
+                    pointValue = point.getX();
+                else
+                    pointValue = point.getY();
+                pointValue = (pointValue * 256.0f) + 256.0f;
                 if (i == 1)
                     signalPath.startNewSubPath(512.0f, pointValue);
                 else

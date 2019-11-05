@@ -148,6 +148,8 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     ScopedNoDenormals noDenormals;
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
+    const auto direction = *parameters.getRawParameterValue("direction");
+
     const auto frequency = *parameters.getRawParameterValue("frequency");
     const auto phaseIncrement = frequency / getSampleRate();
 
@@ -168,8 +170,10 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
         const auto length = processorPath.getLength();
 
         const auto point = processorPath.getPointAlongPath(length * t);
-
-        channelData[sample] = point.getX();
+        if (direction == 0)
+            channelData[sample] = point.getX();
+        else
+            channelData[sample] = point.getY();
         t += phaseIncrement;
 
         if (t >= 1.0f)
