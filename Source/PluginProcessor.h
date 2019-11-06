@@ -70,6 +70,9 @@ private:
     std::atomic<bool> processorNeedNewPath = true;
     std::atomic<bool> guiUpdatingPath = false;
 
+    LagrangeInterpolator resampler;
+    AudioBuffer<float> oversampledBuffer;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathSynthAudioProcessor)
 };

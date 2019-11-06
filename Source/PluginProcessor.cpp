@@ -36,7 +36,6 @@ PathSynthAudioProcessor::PathSynthAudioProcessor(): AudioProcessor(
                                                                nullptr,
                                                                "PathSynth",
                                                                createParameterLayout())
-
 {
 }
 
@@ -109,8 +108,9 @@ void PathSynthAudioProcessor::changeProgramName(int index, const String& newName
 //==============================================================================
 void PathSynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    resampler.reset();
+    oversampledBuffer.setSize(1, samplesPerBlock * 2);
+    oversampledBuffer.clear();
 }
 
 void PathSynthAudioProcessor::releaseResources()
@@ -146,15 +146,15 @@ bool PathSynthAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts)
 void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
     ScopedNoDenormals noDenormals;
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
+    const auto totalNumOutputChannels = getTotalNumOutputChannels();
 
     const auto direction = *parameters.getRawParameterValue("direction");
 
     const auto frequency = *parameters.getRawParameterValue("frequency");
-    const auto phaseIncrement = frequency / getSampleRate();
+    const auto phaseIncrement = frequency / (getSampleRate() * 2.0);
 
-    auto* channelData = buffer.getWritePointer(0);
-    for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
+    auto* channelData = oversampledBuffer.getWritePointer(0);
+    for (auto sample = 0; sample < oversampledBuffer.getNumSamples(); ++sample)
     {
         if (!guiUpdatingPath)
         {
@@ -170,18 +170,29 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
         const auto length = processorPath.getLength();
 
         const auto point = processorPath.getPointAlongPath(length * t);
+
+        float value;
         if (direction == 0)
-            channelData[sample] = point.getX();
+            value = point.getX();
         else
-            channelData[sample] = point.getY();
+            value = point.getY();
+
+        channelData[sample] = value;
+
         t += phaseIncrement;
 
         if (t >= 1.0f)
         {
             t -= 1.0f;
+            if (t >= 1.0f) { jassertfalse; }
         }
     }
 
+    // downsample the oversampled data
+    const auto outputBuffer = buffer.getWritePointer(0);
+    resampler.process(2.0, channelData, outputBuffer, buffer.getNumSamples());
+
+    // copy the processed channel to all the other channels
     for (auto i = 1; i < totalNumOutputChannels; ++i)
         buffer.copyFrom(i, 0, buffer, 0, 0, buffer.getNumSamples());
 }
