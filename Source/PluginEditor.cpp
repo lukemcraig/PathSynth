@@ -38,7 +38,7 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
         auto y = (*parameters.getRawParameterValue("point" + String(i) + "y") * 512.0f) + 256.0f;
         controlPoints[i]->setBounds(x, y, 10.0f, 10.0f);
     }
-    startTimer(5);
+    startTimer(100);
 }
 
 PathSynthAudioProcessorEditor::~PathSynthAudioProcessorEditor()
@@ -84,9 +84,9 @@ void PathSynthAudioProcessorEditor::timerCallback()
         controlPoints[i]->setBounds(x, y, 10.0f, 10.0f);
     }
 
-    const auto smoothing = *parameters.getRawParameterValue("smoothing");
+    const auto smoothing = *parameters.getRawParameterValue("smoothing")* 200.0f;
     const auto direction = *parameters.getRawParameterValue("direction");
-    if (pathChanged || lastSmoothing != smoothing || lastDirection != direction || processorWasBusy)
+    if (true || pathChanged || lastSmoothing != smoothing || lastDirection != direction)
     {
         pathChanged = false;
         lastSmoothing = smoothing;
