@@ -6,8 +6,8 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
                                                              AudioProcessorValueTreeState& apvts)
     : AudioProcessorEditor(&p), processor(p), parameters(apvts)
 {
-    auto width = 512;
-    auto height = 512;
+    addAndMakeVisible(planeComponent);
+    addAndMakeVisible(waveDisplayComponent);
 
     addAndMakeVisible(frequencySlider);
     frequencyAttachment.reset(new SliderAttachment(parameters, "frequency", frequencySlider));
@@ -30,12 +30,12 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
         addAndMakeVisible(controlPoint.get());
     }
 
-    setSize(width * 2, height);
+    setSize(1024, 512);
 
     for (auto i = 0; i < controlPoints.size(); ++i)
     {
-        auto x = (*parameters.getRawParameterValue("point" + String(i) + "x") * 512.0f) + 256.0f;
-        auto y = (*parameters.getRawParameterValue("point" + String(i) + "y") * 512.0f) + 256.0f;
+        auto x = (*parameters.getRawParameterValue("point" + String(i) + "x") * 512) + 256.0f;
+        auto y = (*parameters.getRawParameterValue("point" + String(i) + "y") * 512) + 256.0f;
         controlPoints[i]->setBounds(x, y, 10.0f, 10.0f);
     }
     startTimer(100);
@@ -51,13 +51,6 @@ void PathSynthAudioProcessorEditor::paint(Graphics& g)
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 
-    g.setColour(Colours::grey);
-
-    g.drawLine(12.0f, 256.0f, 500.0f, 256.0f);
-    g.drawLine(256.0f, 12.0f, 256.0f, 500.0f);
-
-    g.drawLine(512.0f, 256.0f, 1012.0f, 256.0f);
-
     g.strokePath(straightPath, PathStrokeType(1.0));
 
     g.setColour(Colours::white);
@@ -70,9 +63,13 @@ void PathSynthAudioProcessorEditor::paint(Graphics& g)
 void PathSynthAudioProcessorEditor::resized()
 {
     auto bounds = getBounds();
+
     directionBox.setBounds(bounds.removeFromBottom(20));
     smoothSlider.setBounds(bounds.removeFromBottom(20));
     frequencySlider.setBounds(bounds.removeFromBottom(20));
+
+    planeComponent.setBounds(bounds.removeFromLeft(bounds.proportionOfWidth(0.5)).reduced(10));
+    waveDisplayComponent.setBounds(bounds.reduced(10));
 }
 
 void PathSynthAudioProcessorEditor::timerCallback()
@@ -84,7 +81,7 @@ void PathSynthAudioProcessorEditor::timerCallback()
         controlPoints[i]->setBounds(x, y, 10.0f, 10.0f);
     }
 
-    const auto smoothing = *parameters.getRawParameterValue("smoothing")* 200.0f;
+    const auto smoothing = *parameters.getRawParameterValue("smoothing") * 200.0f;
     const auto direction = *parameters.getRawParameterValue("direction");
     if (true || pathChanged || lastSmoothing != smoothing || lastDirection != direction)
     {

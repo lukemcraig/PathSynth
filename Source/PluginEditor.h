@@ -3,6 +3,8 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 #include "ControlPointComponent.h"
+#include "PlaneComponent.h"
+#include "WaveDisplayComponent.h"
 
 //==============================================================================
 /**
@@ -23,13 +25,15 @@ public:
     void timerCallback() override;
 
 private:
-    //todo put the 2d stuff in their own component?
-
     typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
     typedef AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 
     PathSynthAudioProcessor& processor;
     AudioProcessorValueTreeState& parameters;
+
+    WaveDisplayComponent waveDisplayComponent;
+    PlaneComponent planeComponent;
+    std::vector<std::unique_ptr<ControlPointComponent>> controlPoints;
 
     Slider frequencySlider;
     std::unique_ptr<SliderAttachment> frequencyAttachment;
@@ -40,14 +44,12 @@ private:
     ComboBox directionBox;
     std::unique_ptr<ComboBoxAttachment> directionAttachment;
 
-    std::vector<std::unique_ptr<ControlPointComponent>> controlPoints;
-
     Path straightPath;
     Path smoothPath;
     Path signalPath;
     bool pathChanged = true;
     float lastSmoothing = 0.0f;
-    float lastDirection = 0.0f;   
+    float lastDirection = 0.0f;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathSynthAudioProcessorEditor)
 };
