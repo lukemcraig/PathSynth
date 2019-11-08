@@ -234,9 +234,6 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
 
 void PathSynthAudioProcessor::setPath()
 {
-    const auto smoothing = *parameters.getRawParameterValue("smoothing");
-    auto direction = *parameters.getRawParameterValue("direction");
-
     straightPath.clear();
 
     const Point<float> firstPointPos{
@@ -254,6 +251,7 @@ void PathSynthAudioProcessor::setPath()
     }
     straightPath.closeSubPath();
 
+    const auto smoothing = *parameters.getRawParameterValue("smoothing");
     processorPath = straightPath.createPathWithRoundedCorners(smoothing);
 
     const auto smoothPathBounds = processorPath.getBounds();

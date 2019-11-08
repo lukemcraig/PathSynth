@@ -40,9 +40,10 @@ void ControlPointComponent::mouseDrag(const MouseEvent& event)
 {
     dragger.dragComponent(this, event, nullptr);
     pathChanged = true;
+
     const auto parentComponent = getParentComponent();
     const auto newPosition = event.getEventRelativeTo(parentComponent).getPosition();
-    const auto newPositionX = static_cast<float>(newPosition.getX()) / parentComponent->getWidth();
+    const auto newPositionX = static_cast<float>(newPosition.getX()) / (parentComponent->getWidth()*0.5f);
     const auto newPositionY =  static_cast<float>(newPosition.getY()) / parentComponent->getHeight();
     DBG(String(index)+" "+String(newPositionX)+" "+String(newPositionY));
     if (auto* p = parameters.getParameter("point" + String(index) + "x"))

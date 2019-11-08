@@ -113,7 +113,7 @@ void PathSynthAudioProcessorEditor::resized()
 void PathSynthAudioProcessorEditor::timerCallback()
 {
     const auto smoothing = *parameters.getRawParameterValue("smoothing");
-    auto direction = *parameters.getRawParameterValue("direction");
+    const auto direction = *parameters.getRawParameterValue("direction");
     if (pathChanged || lastSmoothing != smoothing || lastDirection != direction || processorWasBusy)
     {
         pathChanged = false;
@@ -121,16 +121,17 @@ void PathSynthAudioProcessorEditor::timerCallback()
         lastDirection = direction;
         straightPath.clear();
 
-        auto firstPointPos = controlPoints[0]->getPosition().toFloat();
-        firstPointPos.setX(*parameters.getRawParameterValue("point0x"));
-        firstPointPos.setY(*parameters.getRawParameterValue("point0y"));
+        const Point<float> firstPointPos{
+            *parameters.getRawParameterValue("point0x"), *parameters.getRawParameterValue("point0y")
+        };
         straightPath.startNewSubPath(firstPointPos);
 
-        for (auto i = 1; i < controlPoints.size(); ++i)
+        for (auto i = 1; i < 8; ++i)
         {
-            auto pointPos = controlPoints[i]->getPosition().toFloat();
-            pointPos.setX(*parameters.getRawParameterValue("point" + String(i) + "x"));
-            pointPos.setY(*parameters.getRawParameterValue("point" + String(i) + "y"));
+            const Point<float> pointPos{
+                *parameters.getRawParameterValue("point" + String(i) + "x"),
+                *parameters.getRawParameterValue("point" + String(i) + "y")
+            };
             straightPath.lineTo(pointPos);
         }
         straightPath.closeSubPath();
