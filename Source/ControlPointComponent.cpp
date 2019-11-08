@@ -16,7 +16,8 @@ ControlPointComponent::
 ControlPointComponent(AudioProcessorValueTreeState& parameters, const int index) :
     parameters(parameters), index(index)
 {
-    constrainer.setMinimumOnscreenAmounts(10, 10, 10, 10);
+    constrainer.setMinimumOnscreenAmounts(0xffffff, 0xffffff,
+                                          0xffffff, 0xffffff);
 }
 
 ControlPointComponent::~ControlPointComponent()

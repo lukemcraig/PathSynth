@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "PathSynthConstants.h"
 
 AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
@@ -171,7 +172,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     ScopedNoDenormals noDenormals;
     const auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    setPath();
+    
 
     const auto direction = *parameters.getRawParameterValue("direction");
 
@@ -181,6 +182,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     auto* channelData = oversampledBuffer.getWritePointer(0);
     for (auto sample = 0; sample < oversampledBuffer.getNumSamples(); ++sample)
     {
+        setPath();
         const auto length = processorPath.getLength();
 
         const auto point = processorPath.getPointAlongPath(length * t);
@@ -241,6 +243,7 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
 //==============================================================================
 void PathSynthAudioProcessor::setPath()
 {
+    //todo check if it changed
     straightPath.clear();
 
     const Point<float> firstPointPos{
@@ -249,7 +252,7 @@ void PathSynthAudioProcessor::setPath()
     };
     straightPath.startNewSubPath(firstPointPos);
 
-    for (auto i = 1; i < 8; ++i)
+    for (auto i = 1; i < PathSynthConstants::numControlPoints; ++i)
     {
         const Point<float> pointPos{
             *parameters.getRawParameterValue("point" + String(i) + "x"),

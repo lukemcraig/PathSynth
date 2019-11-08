@@ -21,8 +21,9 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     directionAttachment.reset(new ComboBoxAttachment(parameters, "direction", directionBox));
 
     setResizable(true, true);
+    setResizeLimits(32, 32,2048,2048);
     setSize(1024, 512);
-    
+
     startTimer(100);
 }
 

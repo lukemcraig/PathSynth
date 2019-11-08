@@ -10,11 +10,12 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PlaneComponent.h"
+#include "PathSynthConstants.h"
 
 //==============================================================================
 PlaneComponent::PlaneComponent(AudioProcessorValueTreeState& parameters) : parameters(parameters)
 {
-    for (auto i = 0; i < 8; ++i)
+    for (auto i = 0; i < PathSynthConstants::numControlPoints; ++i)
     {
         controlPoints.emplace_back(std::make_unique<ControlPointComponent>(parameters, i));
     }
