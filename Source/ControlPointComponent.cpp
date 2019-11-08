@@ -42,23 +42,17 @@ void ControlPointComponent::mouseDrag(const MouseEvent& event)
 
     const auto parentComponent = getParentComponent();
     const auto newPosition = event.getEventRelativeTo(parentComponent).getPosition();
-    const auto newPositionX = 2.0f * (static_cast<float>(newPosition.getX()) / parentComponent->getWidth()) - 1.0f;
-    const auto newPositionY = 2.0f * (static_cast<float>(newPosition.getY()) / parentComponent->getHeight()) - 1.0f;
-    DBG(newPositionX);
+    const auto newPositionX = static_cast<float>(newPosition.getX()) / parentComponent->getWidth();
+    const auto newPositionY = static_cast<float>(newPosition.getY()) / parentComponent->getHeight();
+
     if (auto* p = parameters.getParameter("point" + String(index) + "x"))
     {
-        //todo reuse p for this?
-        const float newValue = parameters.getParameterRange("point" + String(index) + "x").convertTo0to1(newPositionX);
-
-        if (p->getValue() != newValue)
-            p->setValueNotifyingHost(newValue);
+        if (p->getValue() != newPositionX)
+            p->setValueNotifyingHost(newPositionX);
     }
     if (auto* p = parameters.getParameter("point" + String(index) + "y"))
     {
-        //todo reuse p for this?
-        const float newValue = parameters.getParameterRange("point" + String(index) + "y").convertTo0to1(newPositionY);
-
-        if (p->getValue() != newValue)
-            p->setValueNotifyingHost(newValue);
+        if (p->getValue() != newPositionY)
+            p->setValueNotifyingHost(newPositionY);
     }
 }

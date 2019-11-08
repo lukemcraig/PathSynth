@@ -37,15 +37,23 @@ void PlaneComponent::paint(Graphics& g)
     g.setColour(Colours::grey);
     g.drawRect(getLocalBounds(), 1); // draw an outline around the component
 
-    // draw axes
-    g.drawLine(0, getHeight() * 0.5f, getWidth(), getHeight() * 0.5f);
-    g.drawLine(getWidth() * 0.5f, 0, getWidth() * 0.5f, getHeight());
+    const auto width = static_cast<float>(getWidth());
+    const auto height = static_cast<float>(getHeight());
 
-    // draw paths
+    const auto halfWidth = width * 0.5f;
+    const auto halfHeight = height * 0.5f;
+
+    // draw x axis
+    g.drawLine(0, halfHeight, width, halfHeight);
+
+    // draw y axis
+    g.drawLine(halfWidth, 0, halfWidth, height);
+
+    // draw dashed straight path
     g.strokePath(straightPath, PathStrokeType(1.0));
 
+    // draw solid smooth path
     g.setColour(Colours::white);
-
     g.strokePath(smoothPath, PathStrokeType(1.0));
 }
 
@@ -62,8 +70,8 @@ void PlaneComponent::resized()
         x *= 0.5f;
         y *= 0.5f;
 
-        x *= getWidth();
-        y *= getHeight();
+        x *= static_cast<float>(getWidth());
+        y *= static_cast<float>(getHeight());
 
         controlPoints[i]->setBounds(x, y, 10.0f, 10.0f);
     }
