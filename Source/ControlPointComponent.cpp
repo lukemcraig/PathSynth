@@ -42,11 +42,12 @@ void ControlPointComponent::mouseDrag(const MouseEvent& event)
 
     const auto parentComponent = getParentComponent();
     const auto newPosition = event.getEventRelativeTo(parentComponent).getPosition();
-    const auto newPositionX = static_cast<float>(newPosition.getX()) / (parentComponent->getWidth() * 0.5f);
-    const auto newPositionY = static_cast<float>(newPosition.getY()) / parentComponent->getHeight();
-
+    const auto newPositionX = 2.0f * (static_cast<float>(newPosition.getX()) / parentComponent->getWidth()) - 1.0f;
+    const auto newPositionY = 2.0f * (static_cast<float>(newPosition.getY()) / parentComponent->getHeight()) - 1.0f;
+    DBG(newPositionX);
     if (auto* p = parameters.getParameter("point" + String(index) + "x"))
     {
+        //todo reuse p for this?
         const float newValue = parameters.getParameterRange("point" + String(index) + "x").convertTo0to1(newPositionX);
 
         if (p->getValue() != newValue)
@@ -54,6 +55,7 @@ void ControlPointComponent::mouseDrag(const MouseEvent& event)
     }
     if (auto* p = parameters.getParameter("point" + String(index) + "y"))
     {
+        //todo reuse p for this?
         const float newValue = parameters.getParameterRange("point" + String(index) + "y").convertTo0to1(newPositionY);
 
         if (p->getValue() != newValue)

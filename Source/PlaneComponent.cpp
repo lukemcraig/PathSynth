@@ -77,7 +77,7 @@ Path PlaneComponent::update()
 
     straightPath.startNewSubPath(controlPoints[0]->getPosition().toFloat());
 
-    for (auto i = 1; i < 8; ++i)
+    for (auto i = 1; i < controlPoints.size(); ++i)
     {
         straightPath.lineTo(controlPoints[i]->getPosition().toFloat());
     }
