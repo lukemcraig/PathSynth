@@ -167,6 +167,8 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     ScopedNoDenormals noDenormals;
     const auto totalNumOutputChannels = getTotalNumOutputChannels();
 
+    setPath();
+
     const auto direction = *parameters.getRawParameterValue("direction");
 
     const auto frequency = *parameters.getRawParameterValue("frequency");
@@ -175,17 +177,6 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     auto* channelData = oversampledBuffer.getWritePointer(0);
     for (auto sample = 0; sample < oversampledBuffer.getNumSamples(); ++sample)
     {
-        if (!guiUpdatingPath)
-        {
-            processorUpdatingPath = true;
-            if (processorNeedNewPath)
-            {
-                processorPath = nextProcessorPath;
-                processorNeedNewPath = false;
-            }
-            processorUpdatingPath = false;
-        }
-
         const auto length = processorPath.getLength();
 
         const auto point = processorPath.getPointAlongPath(length * t);
@@ -241,18 +232,34 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
     // whose contents will have been created by the getStateInformation() call.
 }
 
-bool PathSynthAudioProcessor::setPath(const Path& path)
+void PathSynthAudioProcessor::setPath()
 {
-    // if the audio thread is copying from the last nextProcessorPath, this new path will get skipped but that's ok.
-    if (!processorUpdatingPath)
+    const auto smoothing = *parameters.getRawParameterValue("smoothing");
+    auto direction = *parameters.getRawParameterValue("direction");
+
+    straightPath.clear();
+
+    const Point<float> firstPointPos{
+        *parameters.getRawParameterValue("point0x"), *parameters.getRawParameterValue("point0y")
+    };
+    straightPath.startNewSubPath(firstPointPos);
+
+    for (auto i = 1; i < 8; ++i)
     {
-        guiUpdatingPath = true;
-        nextProcessorPath = path;
-        processorNeedNewPath = true;
-        guiUpdatingPath = false;
-        return true;
+        const Point<float> pointPos{
+            *parameters.getRawParameterValue("point" + String(i) + "x"),
+            *parameters.getRawParameterValue("point" + String(i) + "y")
+        };
+        straightPath.lineTo(pointPos);
     }
-    return false;
+    straightPath.closeSubPath();
+
+    processorPath = straightPath.createPathWithRoundedCorners(smoothing);
+
+    const auto smoothPathBounds = processorPath.getBounds();
+    processorPath.applyTransform(
+        AffineTransform::translation(-smoothPathBounds.getCentreX(), -smoothPathBounds.getCentreY()).followedBy(
+            AffineTransform::scale(1.0f / smoothPathBounds.getWidth(), 1.0f / smoothPathBounds.getHeight())));
 }
 
 //==============================================================================

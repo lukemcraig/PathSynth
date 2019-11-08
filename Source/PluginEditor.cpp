@@ -146,12 +146,12 @@ void PathSynthAudioProcessorEditor::timerCallback()
             newPath.applyTransform(
                 AffineTransform::translation(-newPathBounds.getCentreX(), -newPathBounds.getCentreY()).followedBy(
                     AffineTransform::scale(1.0f / newPathBounds.getWidth(), 1.0f / newPathBounds.getHeight())));
-            auto newPathBoundsScaled = newPath.getBounds();
+            //auto newPathBoundsScaled = newPath.getBounds();
         }
 
         //processorWasBusy = !processor.setPath(newPath);
-        if (processorWasBusy)
-        DBG("processorWasBusy");
+        /*if (processorWasBusy)
+        DBG("processorWasBusy");*/
 
         {
             const auto length = newPath.getLength();
