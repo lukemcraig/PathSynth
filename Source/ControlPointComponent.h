@@ -31,9 +31,12 @@ public:
     void mouseDrag(const MouseEvent& event) override;
 
 private:
-    ComponentDragger dragger;
     AudioProcessorValueTreeState& parameters;
+
     int index;
+
+    ComponentDragger dragger;
+    ComponentBoundsConstrainer constrainer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlPointComponent)
 };

@@ -16,6 +16,7 @@ ControlPointComponent::
 ControlPointComponent(AudioProcessorValueTreeState& parameters, int index) :
     parameters(parameters), index(index)
 {
+    constrainer.setMinimumOnscreenAmounts(10, 10, 10, 10);
 }
 
 ControlPointComponent::~ControlPointComponent()
@@ -38,7 +39,7 @@ void ControlPointComponent::mouseDown(const MouseEvent& event)
 
 void ControlPointComponent::mouseDrag(const MouseEvent& event)
 {
-    dragger.dragComponent(this, event, nullptr);
+    dragger.dragComponent(this, event, &constrainer);
 
     const auto parentComponent = getParentComponent();
     const auto newPosition = event.getEventRelativeTo(parentComponent).getPosition();
