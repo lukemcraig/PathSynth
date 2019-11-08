@@ -20,11 +20,6 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     directionBox.addItem("Y", 2);
     directionAttachment.reset(new ComboBoxAttachment(parameters, "direction", directionBox));
 
-    const auto halfWidth = 0.5f * width;
-    const auto halfHeight = 0.5f * height;
-    const auto transform = AffineTransform::scale(40.0f, 40.0f).followedBy(
-        AffineTransform::translation(halfWidth, halfHeight));
-
     for (auto i = 0; i < 8; ++i)
     {
         controlPoints.emplace_back(std::make_unique<ControlPointComponent>(pathChanged, parameters, i));
@@ -39,8 +34,8 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
 
     for (auto i = 0; i < controlPoints.size(); ++i)
     {
-        auto x = (*parameters.getRawParameterValue("point" + String(i) + "x") * 512.0f) - 5.0f;
-        auto y = (*parameters.getRawParameterValue("point" + String(i) + "y") * 512.0f) - 5.0f;
+        auto x = (*parameters.getRawParameterValue("point" + String(i) + "x") * 512.0f) + 256.0f;
+        auto y = (*parameters.getRawParameterValue("point" + String(i) + "y") * 512.0f) + 256.0f;
         controlPoints[i]->setBounds(x, y, 10.0f, 10.0f);
     }
     startTimer(5);
@@ -91,16 +86,17 @@ void PathSynthAudioProcessorEditor::timerCallback()
         lastDirection = direction;
         straightPath.clear();
 
+        // TODO maybe just make this use the control points instead of the parameters?
         const Point<float> firstPointPos{
-            *parameters.getRawParameterValue("point0x")*512.0f, *parameters.getRawParameterValue("point0y")*512.0f
+            *parameters.getRawParameterValue("point0x") * 512.0f, *parameters.getRawParameterValue("point0y") * 512.0f
         };
         straightPath.startNewSubPath(firstPointPos);
 
         for (auto i = 1; i < 8; ++i)
         {
             const Point<float> pointPos{
-                *parameters.getRawParameterValue("point" + String(i) + "x")*512.0f,
-                *parameters.getRawParameterValue("point" + String(i) + "y")*512.0f
+                *parameters.getRawParameterValue("point" + String(i) + "x") * 512.0f,
+                *parameters.getRawParameterValue("point" + String(i) + "y") * 512.0f
             };
             straightPath.lineTo(pointPos);
         }

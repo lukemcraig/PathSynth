@@ -16,6 +16,7 @@ ControlPointComponent::
 ControlPointComponent(bool& pathChanged, AudioProcessorValueTreeState& parameters, int index) :
     pathChanged(pathChanged), parameters(parameters), index(index)
 {
+    // TODO timer to check parameters?
 }
 
 ControlPointComponent::~ControlPointComponent()

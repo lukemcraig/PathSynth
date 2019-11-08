@@ -26,22 +26,26 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                             0));
     for (auto i = 0; i < 8; ++i)
     {
+        auto x = std::cos((i / 8.0f) * MathConstants<float>::twoPi)*.25f;
+        auto y = std::sin((i / 8.0f) * MathConstants<float>::twoPi)*.25f;
+        DBG(String(x)+", "+String(y));
         params.push_back(std::make_unique<AudioParameterFloat>("point" + String(i) + "x",
                                                                "Point" + String(i) + "_X",
-                                                               NormalisableRange<float>(0.0f,
+                                                               NormalisableRange<float>(-1.0f,
                                                                                         1.0f,
                                                                                         0.0f,
                                                                                         1.0f,
                                                                                         false),
-                                                               i / 8.0));
+                                                               x));
+
         params.push_back(std::make_unique<AudioParameterFloat>("point" + String(i) + "y",
                                                                "Point" + String(i) + "_Y",
-                                                               NormalisableRange<float>(0.0f,
+                                                               NormalisableRange<float>(-1.0f,
                                                                                         1.0f,
                                                                                         0.0f,
                                                                                         1.0f,
                                                                                         false),
-                                                               i / 8.0));
+                                                               y));
     }
     return {params.begin(), params.end()};
 }
