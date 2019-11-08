@@ -128,7 +128,7 @@ void PathSynthAudioProcessor::changeProgramName(int index, const String& newName
 void PathSynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     resampler.reset();
-    oversampledBuffer.setSize(1, samplesPerBlock * 4);
+    oversampledBuffer.setSize(1, samplesPerBlock * 2);
     oversampledBuffer.clear();
 }
 
@@ -172,7 +172,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     const auto direction = *parameters.getRawParameterValue("direction");
 
     const auto frequency = *parameters.getRawParameterValue("frequency");
-    const auto phaseIncrement = frequency / (getSampleRate() * 4.0);
+    const auto phaseIncrement = frequency / (getSampleRate() * 2.0);
 
     auto* channelData = oversampledBuffer.getWritePointer(0);
     for (auto sample = 0; sample < oversampledBuffer.getNumSamples(); ++sample)
@@ -200,7 +200,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
     // downsample the oversampled data
     const auto outputBuffer = buffer.getWritePointer(0);
-    resampler.process(4.0, channelData, outputBuffer, buffer.getNumSamples());
+    resampler.process(2.0, channelData, outputBuffer, buffer.getNumSamples());
 
     // copy the processed channel to all the other channels
     for (auto i = 1; i < totalNumOutputChannels; ++i)

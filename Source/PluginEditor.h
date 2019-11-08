@@ -41,7 +41,7 @@ private:
     std::unique_ptr<ComboBoxAttachment> directionAttachment;
 
     std::vector<std::unique_ptr<ControlPointComponent>> controlPoints;
-    std::vector<Point<float>> points;
+
     Path straightPath;
     Path smoothPath;
     Path signalPath;
