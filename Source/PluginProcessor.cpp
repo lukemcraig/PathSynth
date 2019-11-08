@@ -9,7 +9,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                            NormalisableRange<float>(1.0f,
                                                                                     20000.0f,
                                                                                     0.0f,
-                                                                                    0.5f,
+                                                                                    0.25f,
                                                                                     false),
                                                            100.0f));
     params.push_back(std::make_unique<AudioParameterFloat>("smoothing",
@@ -24,6 +24,25 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                             "Direction",
                                                             StringArray{"X", "Y"},
                                                             0));
+    for (auto i = 0; i < 8; ++i)
+    {
+        params.push_back(std::make_unique<AudioParameterFloat>("point" + String(i) + "x",
+                                                               "Point" + String(i) + "_X",
+                                                               NormalisableRange<float>(0.0f,
+                                                                                        1.0f,
+                                                                                        0.0f,
+                                                                                        1.0f,
+                                                                                        false),
+                                                               i / 8.0));
+        params.push_back(std::make_unique<AudioParameterFloat>("point" + String(i) + "y",
+                                                               "Point" + String(i) + "_Y",
+                                                               NormalisableRange<float>(0.0f,
+                                                                                        1.0f,
+                                                                                        0.0f,
+                                                                                        1.0f,
+                                                                                        false),
+                                                               i / 8.0));
+    }
     return {params.begin(), params.end()};
 }
 
@@ -109,7 +128,7 @@ void PathSynthAudioProcessor::changeProgramName(int index, const String& newName
 void PathSynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     resampler.reset();
-    oversampledBuffer.setSize(1, samplesPerBlock * 2);
+    oversampledBuffer.setSize(1, samplesPerBlock * 4);
     oversampledBuffer.clear();
 }
 
@@ -151,7 +170,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     const auto direction = *parameters.getRawParameterValue("direction");
 
     const auto frequency = *parameters.getRawParameterValue("frequency");
-    const auto phaseIncrement = frequency / (getSampleRate() * 2.0);
+    const auto phaseIncrement = frequency / (getSampleRate() * 4.0);
 
     auto* channelData = oversampledBuffer.getWritePointer(0);
     for (auto sample = 0; sample < oversampledBuffer.getNumSamples(); ++sample)
@@ -190,7 +209,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
     // downsample the oversampled data
     const auto outputBuffer = buffer.getWritePointer(0);
-    resampler.process(2.0, channelData, outputBuffer, buffer.getNumSamples());
+    resampler.process(4.0, channelData, outputBuffer, buffer.getNumSamples());
 
     // copy the processed channel to all the other channels
     for (auto i = 1; i < totalNumOutputChannels; ++i)

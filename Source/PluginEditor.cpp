@@ -51,10 +51,13 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     const auto transform = AffineTransform::scale(40.0f, 40.0f).followedBy(
         AffineTransform::translation(halfWidth, halfHeight));
 
-    for (auto&& point : points)
     {
-        point.applyTransform(transform);
-        controlPoints.emplace_back(std::make_unique<ControlPointComponent>(pathChanged));
+        int i = 0;
+        for (auto&& point : points)
+        {
+            point.applyTransform(transform);
+            controlPoints.emplace_back(std::make_unique<ControlPointComponent>(pathChanged, parameters, i++));
+        }
     }
 
     for (auto&& controlPoint : controlPoints)
@@ -83,17 +86,20 @@ void PathSynthAudioProcessorEditor::paint(Graphics& g)
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 
-    g.setColour(Colours::white);
+    g.setColour(Colours::grey);
 
     g.drawLine(12.0f, 256.0f, 500.0f, 256.0f);
     g.drawLine(256.0f, 12.0f, 256.0f, 500.0f);
 
+    g.drawLine(512.0f, 256.0f, 1012.0f, 256.0f);
+
     g.strokePath(straightPath, PathStrokeType(1.0));
+
+    g.setColour(Colours::white);
+
     g.strokePath(smoothPath, PathStrokeType(1.0));
 
     g.strokePath(signalPath, PathStrokeType(1.0));
-
-    g.drawLine(512.0f, 256.0f, 1012.0f, 256.0f);
 }
 
 void PathSynthAudioProcessorEditor::resized()
@@ -116,20 +122,23 @@ void PathSynthAudioProcessorEditor::timerCallback()
         straightPath.clear();
 
         auto firstPointPos = controlPoints[0]->getPosition().toFloat();
-        firstPointPos.setX(firstPointPos.x + controlPoints[0]->getWidth() * 0.5f);
-        firstPointPos.setY(firstPointPos.y + controlPoints[0]->getHeight() * 0.5f);
+        firstPointPos.setX(*parameters.getRawParameterValue("point0x"));
+        firstPointPos.setY(*parameters.getRawParameterValue("point0y"));
         straightPath.startNewSubPath(firstPointPos);
 
         for (auto i = 1; i < controlPoints.size(); ++i)
         {
             auto pointPos = controlPoints[i]->getPosition().toFloat();
-            pointPos.setX(pointPos.x + controlPoints[i]->getWidth() * 0.5f);
-            pointPos.setY(pointPos.y + controlPoints[i]->getHeight() * 0.5f);
+            pointPos.setX(*parameters.getRawParameterValue("point" + String(i) + "x"));
+            pointPos.setY(*parameters.getRawParameterValue("point" + String(i) + "y"));
             straightPath.lineTo(pointPos);
         }
         straightPath.closeSubPath();
 
         smoothPath = straightPath.createPathWithRoundedCorners(smoothing);
+
+        float dashes[] = {2.0f, 3.0f, 4.0f, 5.0f};
+        PathStrokeType(1.0).createDashedStroke(straightPath, straightPath, dashes, 4);
 
         Path newPath = smoothPath;
         {
@@ -140,9 +149,10 @@ void PathSynthAudioProcessorEditor::timerCallback()
             auto newPathBoundsScaled = newPath.getBounds();
         }
 
-        processorWasBusy = !processor.setPath(newPath);
+        //processorWasBusy = !processor.setPath(newPath);
         if (processorWasBusy)
-            DBG("processorWasBusy");
+        DBG("processorWasBusy");
+
         {
             const auto length = newPath.getLength();
             float t = 0.0f;
