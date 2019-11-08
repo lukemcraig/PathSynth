@@ -16,7 +16,6 @@ ControlPointComponent::
 ControlPointComponent(bool& pathChanged, AudioProcessorValueTreeState& parameters, int index) :
     pathChanged(pathChanged), parameters(parameters), index(index)
 {
-    // TODO timer to check parameters?
 }
 
 ControlPointComponent::~ControlPointComponent()
@@ -44,9 +43,9 @@ void ControlPointComponent::mouseDrag(const MouseEvent& event)
 
     const auto parentComponent = getParentComponent();
     const auto newPosition = event.getEventRelativeTo(parentComponent).getPosition();
-    const auto newPositionX = static_cast<float>(newPosition.getX()) / (parentComponent->getWidth()*0.5f);
-    const auto newPositionY =  static_cast<float>(newPosition.getY()) / parentComponent->getHeight();
-    DBG(String(index)+" "+String(newPositionX)+" "+String(newPositionY));
+    const auto newPositionX = static_cast<float>(newPosition.getX()) / (parentComponent->getWidth() * 0.5f);
+    const auto newPositionY = static_cast<float>(newPosition.getY()) / parentComponent->getHeight();
+    //DBG(String(index)+" "+String(newPositionX)+" "+String(newPositionY));
     if (auto* p = parameters.getParameter("point" + String(index) + "x"))
     {
         const float newValue = parameters.getParameterRange("point" + String(index) + "x").convertTo0to1(newPositionX);

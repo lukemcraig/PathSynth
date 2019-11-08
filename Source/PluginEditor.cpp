@@ -77,6 +77,13 @@ void PathSynthAudioProcessorEditor::resized()
 
 void PathSynthAudioProcessorEditor::timerCallback()
 {
+    for (auto i = 0; i < controlPoints.size(); ++i)
+    {
+        auto x = (*parameters.getRawParameterValue("point" + String(i) + "x") * 512.0f);
+        auto y = (*parameters.getRawParameterValue("point" + String(i) + "y") * 512.0f);
+        controlPoints[i]->setBounds(x, y, 10.0f, 10.0f);
+    }
+
     const auto smoothing = *parameters.getRawParameterValue("smoothing");
     const auto direction = *parameters.getRawParameterValue("direction");
     if (pathChanged || lastSmoothing != smoothing || lastDirection != direction || processorWasBusy)
