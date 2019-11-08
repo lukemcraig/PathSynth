@@ -92,15 +92,15 @@ void PathSynthAudioProcessorEditor::timerCallback()
         straightPath.clear();
 
         const Point<float> firstPointPos{
-            *parameters.getRawParameterValue("point0x"), *parameters.getRawParameterValue("point0y")
+            *parameters.getRawParameterValue("point0x")*512.0f, *parameters.getRawParameterValue("point0y")*512.0f
         };
         straightPath.startNewSubPath(firstPointPos);
 
         for (auto i = 1; i < 8; ++i)
         {
             const Point<float> pointPos{
-                *parameters.getRawParameterValue("point" + String(i) + "x"),
-                *parameters.getRawParameterValue("point" + String(i) + "y")
+                *parameters.getRawParameterValue("point" + String(i) + "x")*512.0f,
+                *parameters.getRawParameterValue("point" + String(i) + "y")*512.0f
             };
             straightPath.lineTo(pointPos);
         }
@@ -117,12 +117,7 @@ void PathSynthAudioProcessorEditor::timerCallback()
             newPath.applyTransform(
                 AffineTransform::translation(-newPathBounds.getCentreX(), -newPathBounds.getCentreY()).followedBy(
                     AffineTransform::scale(1.0f / newPathBounds.getWidth(), 1.0f / newPathBounds.getHeight())));
-            //auto newPathBoundsScaled = newPath.getBounds();
         }
-
-        //processorWasBusy = !processor.setPath(newPath);
-        /*if (processorWasBusy)
-        DBG("processorWasBusy");*/
 
         {
             const auto length = newPath.getLength();
