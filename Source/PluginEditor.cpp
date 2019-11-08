@@ -39,8 +39,8 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
 
     for (auto i = 0; i < controlPoints.size(); ++i)
     {
-        auto x = *parameters.getRawParameterValue("point" + String(i) + "x") - 5.0f;
-        auto y = *parameters.getRawParameterValue("point" + String(i) + "y") - 5.0f;
+        auto x = (*parameters.getRawParameterValue("point" + String(i) + "x") * 512.0f) - 5.0f;
+        auto y = (*parameters.getRawParameterValue("point" + String(i) + "y") * 512.0f) - 5.0f;
         controlPoints[i]->setBounds(x, y, 10.0f, 10.0f);
     }
     startTimer(5);
