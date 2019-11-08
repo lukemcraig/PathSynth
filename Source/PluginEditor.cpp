@@ -20,8 +20,9 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     directionBox.addItem("Y", 2);
     directionAttachment.reset(new ComboBoxAttachment(parameters, "direction", directionBox));
 
+    setResizable(true, true);
     setSize(1024, 512);
-
+    
     startTimer(100);
 }
 

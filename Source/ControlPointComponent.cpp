@@ -13,7 +13,7 @@
 
 //==============================================================================
 ControlPointComponent::
-ControlPointComponent(AudioProcessorValueTreeState& parameters, int index) :
+ControlPointComponent(AudioProcessorValueTreeState& parameters, const int index) :
     parameters(parameters), index(index)
 {
     constrainer.setMinimumOnscreenAmounts(10, 10, 10, 10);
@@ -43,8 +43,8 @@ void ControlPointComponent::mouseDrag(const MouseEvent& event)
 
     const auto parentComponent = getParentComponent();
     const auto newPosition = event.getEventRelativeTo(parentComponent).getPosition();
-    const auto newPositionX = static_cast<float>(newPosition.getX()) / parentComponent->getWidth();
-    const auto newPositionY = static_cast<float>(newPosition.getY()) / parentComponent->getHeight();
+    const auto newPositionX = static_cast<float>(newPosition.getX()) / static_cast<float>(parentComponent->getWidth());
+    const auto newPositionY = static_cast<float>(newPosition.getY()) / static_cast<float>(parentComponent->getHeight());
 
     if (auto* p = parameters.getParameter("point" + String(index) + "x"))
     {

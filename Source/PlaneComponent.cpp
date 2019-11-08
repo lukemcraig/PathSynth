@@ -14,8 +14,6 @@
 //==============================================================================
 PlaneComponent::PlaneComponent(AudioProcessorValueTreeState& parameters) : parameters(parameters)
 {
-    // In your constructor, you should add any child components, and
-    // initialise any special settings that your component needs.
     for (auto i = 0; i < 8; ++i)
     {
         controlPoints.emplace_back(std::make_unique<ControlPointComponent>(parameters, i));
