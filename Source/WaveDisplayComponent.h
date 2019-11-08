@@ -26,6 +26,9 @@ public:
 
     void resized() override;
 
+    void update(Path, int);
+
 private:
+    Path signalPath;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WaveDisplayComponent)
 };

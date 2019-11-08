@@ -33,7 +33,6 @@ private:
 
     WaveDisplayComponent waveDisplayComponent;
     PlaneComponent planeComponent;
-    std::vector<std::unique_ptr<ControlPointComponent>> controlPoints;
 
     Slider frequencySlider;
     std::unique_ptr<SliderAttachment> frequencyAttachment;
@@ -43,13 +42,6 @@ private:
 
     ComboBox directionBox;
     std::unique_ptr<ComboBoxAttachment> directionAttachment;
-
-    Path straightPath;
-    Path smoothPath;
-    Path signalPath;
-    bool pathChanged = true;
-    float lastSmoothing = 0.0f;
-    float lastDirection = 0.0f;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathSynthAudioProcessorEditor)
 };

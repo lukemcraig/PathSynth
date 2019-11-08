@@ -13,8 +13,8 @@
 
 //==============================================================================
 ControlPointComponent::
-ControlPointComponent(bool& pathChanged, AudioProcessorValueTreeState& parameters, int index) :
-    pathChanged(pathChanged), parameters(parameters), index(index)
+ControlPointComponent(AudioProcessorValueTreeState& parameters, int index) :
+    parameters(parameters), index(index)
 {
 }
 
@@ -39,13 +39,12 @@ void ControlPointComponent::mouseDown(const MouseEvent& event)
 void ControlPointComponent::mouseDrag(const MouseEvent& event)
 {
     dragger.dragComponent(this, event, nullptr);
-    pathChanged = true;
 
     const auto parentComponent = getParentComponent();
     const auto newPosition = event.getEventRelativeTo(parentComponent).getPosition();
     const auto newPositionX = static_cast<float>(newPosition.getX()) / (parentComponent->getWidth() * 0.5f);
     const auto newPositionY = static_cast<float>(newPosition.getY()) / parentComponent->getHeight();
-    //DBG(String(index)+" "+String(newPositionX)+" "+String(newPositionY));
+
     if (auto* p = parameters.getParameter("point" + String(index) + "x"))
     {
         const float newValue = parameters.getParameterRange("point" + String(index) + "x").convertTo0to1(newPositionX);
@@ -60,5 +59,4 @@ void ControlPointComponent::mouseDrag(const MouseEvent& event)
         if (p->getValue() != newValue)
             p->setValueNotifyingHost(newValue);
     }
-    //*parameters.getRawParameterValue("point" + String(index) + "x");
 }
