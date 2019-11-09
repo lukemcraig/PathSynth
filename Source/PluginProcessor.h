@@ -63,7 +63,7 @@ private:
     MidiKeyboardState keyboardState;
     MidiMessageCollector midiCollector;
     Path processorPath{};
-    int numVoices{1};
+    int numVoices{4};
     Synthesiser synthesiser;
 
     float t{};
