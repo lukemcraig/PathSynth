@@ -68,6 +68,7 @@ private:
     // TODO different resampling method
     LagrangeInterpolator resampler;
     AudioBuffer<float> oversampledBuffer;
+    const int oversampleFactor = 2;
 
     //==============================================================================
     void setPath();

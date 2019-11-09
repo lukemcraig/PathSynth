@@ -33,7 +33,7 @@ void PlaneComponent::paint(Graphics& g)
 {
     g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId)); // clear the background
 
-    g.setColour(Colours::grey);
+    g.setColour(Colour(0xff513a1d));
     g.drawRect(getLocalBounds(), 1); // draw an outline around the component
 
     const auto width = static_cast<float>(getWidth());
@@ -52,7 +52,7 @@ void PlaneComponent::paint(Graphics& g)
     g.strokePath(straightPath, PathStrokeType(1.0));
 
     // draw solid smooth path
-    g.setColour(Colours::white);
+    g.setColour(Colour(0xfff4e9d8));
     g.strokePath(smoothPath, PathStrokeType(1.0));
 }
 
@@ -69,8 +69,10 @@ void PlaneComponent::resized()
         x *= static_cast<float>(getWidth());
         y *= static_cast<float>(getHeight());
 
-        const auto radius = controlPointRadius;
-        controlPoints[i]->setBounds(x - radius, y - radius, radius * 2, radius * 2);
+        controlPoints[i]->setBounds(x - controlPointRadius,
+                                    y - controlPointRadius,
+                                    controlPointRadius * 2,
+                                    controlPointRadius * 2);
     }
 }
 

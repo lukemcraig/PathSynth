@@ -25,7 +25,26 @@ ControlPointComponent::~ControlPointComponent()
 
 void ControlPointComponent::paint(Graphics& g)
 {
-    g.fillAll(Colour(0xaaffffff));
+    //g.fillAll(Colour(0xaaffffff));
+    auto rect = getLocalBounds().toFloat();
+    g.setColour(Colour(0xffa84350));
+    g.drawEllipse(rect, 2.0f);
+
+    g.setColour(Colour(0xffdac9cb));
+    rect.reduce(2.0f, 2.0f);
+    g.drawEllipse(rect, 2.0f);
+
+    g.setColour(Colour(0xff97b0c4));
+    rect.reduce(2.0f, 2.0f);
+    g.drawEllipse(rect, 2.0f);
+
+    g.setColour(Colour(0xffdcc296));
+    rect.reduce(2.0f, 2.0f);
+    g.drawEllipse(rect, 2.0f);
+
+    g.setColour(Colour(0xffa84350));
+    rect.reduce(2.0f, 2.0f);
+    g.drawEllipse(rect, 2.0f);
 }
 
 void ControlPointComponent::resized()

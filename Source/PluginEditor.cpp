@@ -20,8 +20,12 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     directionBox.addItem("Y", 2);
     directionAttachment.reset(new ComboBoxAttachment(parameters, "direction", directionBox));
 
+    auto& lookAndFeel = getLookAndFeel();
+    lookAndFeel.setColour(ResizableWindow::backgroundColourId,Colour(0xffe4753d));
+    lookAndFeel.setColour(ResizableWindow::backgroundColourId,Colour(0xffe4753d));
+
     setResizable(true, true);
-    setResizeLimits(32, 32,2048,2048);
+    setResizeLimits(32, 32, 2048, 2048);
     setSize(1024, 512);
 
     startTimer(100);

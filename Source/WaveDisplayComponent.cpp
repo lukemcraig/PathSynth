@@ -26,12 +26,17 @@ void WaveDisplayComponent::paint(Graphics& g)
 {
     g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId)); // clear the background
 
-    g.setColour(Colours::grey);
+    g.setColour(Colour(0xff513a1d));
     g.drawRect(getLocalBounds(), 1); // draw an outline around the component
 
-    g.drawLine(0, getHeight() * 0.5f, getWidth(), getHeight() * 0.5f);
+    const auto width = static_cast<float>(getWidth());
+    const auto height = static_cast<float>(getHeight());
+    const auto halfHeight = height * 0.5f;
 
-    g.setColour(Colours::white);
+    // draw x axis
+    g.drawLine(0, halfHeight, width, halfHeight);
+
+    g.setColour(Colour(0xfff4e9d8));
     g.strokePath(signalPath, PathStrokeType(1.0));
 }
 
