@@ -18,7 +18,7 @@
 class ControlPointComponent : public Component
 {
 public:
-    ControlPointComponent(bool&);
+    ControlPointComponent(bool&, AudioProcessorValueTreeState&, int);
 
     ~ControlPointComponent();
 
@@ -33,5 +33,7 @@ public:
 private:
     ComponentDragger dragger;
     bool& pathChanged;
+    AudioProcessorValueTreeState& parameters;
+    int index;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlPointComponent)
 };

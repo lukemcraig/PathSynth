@@ -57,21 +57,19 @@ public:
     void setStateInformation(const void* data, int sizeInBytes) override;
 
     //==============================================================================
-    bool setPath(const Path& path);
 
 private:
     AudioProcessorValueTreeState parameters;
     float t{};
 
-    Path nextProcessorPath{};
     Path processorPath{};
-
-    std::atomic<bool> processorUpdatingPath = false;
-    std::atomic<bool> processorNeedNewPath = true;
-    std::atomic<bool> guiUpdatingPath = false;
+    Path straightPath{};
 
     LagrangeInterpolator resampler;
     AudioBuffer<float> oversampledBuffer;
+
+    //==============================================================================
+    void setPath();
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathSynthAudioProcessor)

@@ -9,13 +9,13 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                            NormalisableRange<float>(1.0f,
                                                                                     20000.0f,
                                                                                     0.0f,
-                                                                                    0.5f,
+                                                                                    0.25f,
                                                                                     false),
                                                            100.0f));
     params.push_back(std::make_unique<AudioParameterFloat>("smoothing",
                                                            "Smoothing",
                                                            NormalisableRange<float>(0.0f,
-                                                                                    200.0f,
+                                                                                    1.0f,
                                                                                     0.0f,
                                                                                     0.9f,
                                                                                     false),
@@ -24,6 +24,29 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                             "Direction",
                                                             StringArray{"X", "Y"},
                                                             0));
+    for (auto i = 0; i < 8; ++i)
+    {
+        auto x = std::cos((i / 8.0f) * MathConstants<float>::twoPi)*.25f;
+        auto y = std::sin((i / 8.0f) * MathConstants<float>::twoPi)*.25f;
+        DBG(String(x)+", "+String(y));
+        params.push_back(std::make_unique<AudioParameterFloat>("point" + String(i) + "x",
+                                                               "Point" + String(i) + "_X",
+                                                               NormalisableRange<float>(-1.0f,
+                                                                                        1.0f,
+                                                                                        0.0f,
+                                                                                        1.0f,
+                                                                                        false),
+                                                               x));
+
+        params.push_back(std::make_unique<AudioParameterFloat>("point" + String(i) + "y",
+                                                               "Point" + String(i) + "_Y",
+                                                               NormalisableRange<float>(-1.0f,
+                                                                                        1.0f,
+                                                                                        0.0f,
+                                                                                        1.0f,
+                                                                                        false),
+                                                               y));
+    }
     return {params.begin(), params.end()};
 }
 
@@ -148,6 +171,8 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     ScopedNoDenormals noDenormals;
     const auto totalNumOutputChannels = getTotalNumOutputChannels();
 
+    setPath();
+
     const auto direction = *parameters.getRawParameterValue("direction");
 
     const auto frequency = *parameters.getRawParameterValue("frequency");
@@ -156,17 +181,6 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     auto* channelData = oversampledBuffer.getWritePointer(0);
     for (auto sample = 0; sample < oversampledBuffer.getNumSamples(); ++sample)
     {
-        if (!guiUpdatingPath)
-        {
-            processorUpdatingPath = true;
-            if (processorNeedNewPath)
-            {
-                processorPath = nextProcessorPath;
-                processorNeedNewPath = false;
-            }
-            processorUpdatingPath = false;
-        }
-
         const auto length = processorPath.getLength();
 
         const auto point = processorPath.getPointAlongPath(length * t);
@@ -222,18 +236,32 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
     // whose contents will have been created by the getStateInformation() call.
 }
 
-bool PathSynthAudioProcessor::setPath(const Path& path)
+void PathSynthAudioProcessor::setPath()
 {
-    // if the audio thread is copying from the last nextProcessorPath, this new path will get skipped but that's ok.
-    if (!processorUpdatingPath)
+    straightPath.clear();
+
+    const Point<float> firstPointPos{
+        *parameters.getRawParameterValue("point0x"), *parameters.getRawParameterValue("point0y")
+    };
+    straightPath.startNewSubPath(firstPointPos);
+
+    for (auto i = 1; i < 8; ++i)
     {
-        guiUpdatingPath = true;
-        nextProcessorPath = path;
-        processorNeedNewPath = true;
-        guiUpdatingPath = false;
-        return true;
+        const Point<float> pointPos{
+            *parameters.getRawParameterValue("point" + String(i) + "x"),
+            *parameters.getRawParameterValue("point" + String(i) + "y")
+        };
+        straightPath.lineTo(pointPos);
     }
-    return false;
+    straightPath.closeSubPath();
+
+    const auto smoothing = *parameters.getRawParameterValue("smoothing");
+    processorPath = straightPath.createPathWithRoundedCorners(smoothing);
+
+    const auto smoothPathBounds = processorPath.getBounds();
+    processorPath.applyTransform(
+        AffineTransform::translation(-smoothPathBounds.getCentreX(), -smoothPathBounds.getCentreY()).followedBy(
+            AffineTransform::scale(1.0f / smoothPathBounds.getWidth(), 1.0f / smoothPathBounds.getHeight())));
 }
 
 //==============================================================================
