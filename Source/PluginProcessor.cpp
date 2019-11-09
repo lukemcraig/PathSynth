@@ -27,8 +27,10 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                             0));
     for (auto i = 0; i < PathSynthConstants::numControlPoints; ++i)
     {
-        auto x = std::cos((i / 8.0f) * MathConstants<float>::twoPi) * .25f;
-        auto y = std::sin((i / 8.0f) * MathConstants<float>::twoPi) * .25f;
+        auto x = std::cos((static_cast<float>(i) / PathSynthConstants::numControlPoints)
+            * MathConstants<float>::twoPi) * .25f;
+        auto y = std::sin((static_cast<float>(i) / PathSynthConstants::numControlPoints)
+            * MathConstants<float>::twoPi) * .25f;
         DBG(String(x)+", "+String(y));
         params.push_back(std::make_unique<AudioParameterFloat>("point" + String(i) + "x",
                                                                "Point" + String(i) + "_X",
