@@ -62,7 +62,7 @@ private:
     AudioProcessorValueTreeState parameters;
     MidiKeyboardState keyboardState;
     Path processorPath{};
-    int numVoices{4};
+    int numVoices{1};
     Synthesiser synthesiser;
 
     float t{};

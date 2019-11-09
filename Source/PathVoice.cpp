@@ -22,6 +22,8 @@ bool PathVoice::canPlaySound(SynthesiserSound* sound)
 
 void PathVoice::startNote(int midiNoteNumber, float velocity, SynthesiserSound* sound, int currentPitchWheelPosition)
 {
+    auto frequency = MidiMessage::getMidiNoteInHertz(midiNoteNumber);
+    phaseIncrement = frequency / getSampleRate();//todo * oversampleFactor
 }
 
 void PathVoice::stopNote(float velocity, bool allowTailOff)
@@ -43,8 +45,8 @@ void PathVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int startSampl
 
     const auto direction = *parameters.getRawParameterValue("direction");
 
-    const auto frequency = *parameters.getRawParameterValue("frequency");
-    const auto phaseIncrement = frequency / getSampleRate(); //todo * oversampleFactor
+    //const auto frequency = *parameters.getRawParameterValue("frequency");
+    //const auto phaseIncrement = frequency / getSampleRate(); 
 
     auto* channelData = outputBuffer.getWritePointer(0);
     for (auto sample = 0; sample < outputBuffer.getNumSamples(); ++sample)
