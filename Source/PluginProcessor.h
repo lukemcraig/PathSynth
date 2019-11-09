@@ -65,6 +65,7 @@ private:
     Path processorPath{};
     Path straightPath{};
 
+    // TODO different resampling method
     LagrangeInterpolator resampler;
     AudioBuffer<float> oversampledBuffer;
 

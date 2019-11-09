@@ -18,7 +18,7 @@
 class ControlPointComponent : public Component
 {
 public:
-    ControlPointComponent(bool&, AudioProcessorValueTreeState&, int);
+    ControlPointComponent(AudioProcessorValueTreeState&, int, int);
 
     ~ControlPointComponent();
 
@@ -31,9 +31,13 @@ public:
     void mouseDrag(const MouseEvent& event) override;
 
 private:
-    ComponentDragger dragger;
-    bool& pathChanged;
     AudioProcessorValueTreeState& parameters;
+
     int index;
+    int radius;
+
+    ComponentDragger dragger;
+    ComponentBoundsConstrainer constrainer;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlPointComponent)
 };

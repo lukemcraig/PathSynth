@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "PathSynthConstants.h"
 
 AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
@@ -26,8 +27,8 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                             0));
     for (auto i = 0; i < 8; ++i)
     {
-        auto x = std::cos((i / 8.0f) * MathConstants<float>::twoPi)*.25f;
-        auto y = std::sin((i / 8.0f) * MathConstants<float>::twoPi)*.25f;
+        auto x = std::cos((i / 8.0f) * MathConstants<float>::twoPi) * .25f;
+        auto y = std::sin((i / 8.0f) * MathConstants<float>::twoPi) * .25f;
         DBG(String(x)+", "+String(y));
         params.push_back(std::make_unique<AudioParameterFloat>("point" + String(i) + "x",
                                                                "Point" + String(i) + "_X",
@@ -171,7 +172,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     ScopedNoDenormals noDenormals;
     const auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    setPath();
+    
 
     const auto direction = *parameters.getRawParameterValue("direction");
 
@@ -181,6 +182,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     auto* channelData = oversampledBuffer.getWritePointer(0);
     for (auto sample = 0; sample < oversampledBuffer.getNumSamples(); ++sample)
     {
+        setPath();
         const auto length = processorPath.getLength();
 
         const auto point = processorPath.getPointAlongPath(length * t);
@@ -225,27 +227,32 @@ AudioProcessorEditor* PathSynthAudioProcessor::createEditor()
 //==============================================================================
 void PathSynthAudioProcessor::getStateInformation(MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    const auto state = parameters.copyState();
+    const auto xml(state.createXml());
+    copyXmlToBinary(*xml, destData);
 }
 
 void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    const auto xmlState(getXmlFromBinary(data, sizeInBytes));
+    if (xmlState != nullptr)
+        if (xmlState->hasTagName(parameters.state.getType()))
+            parameters.replaceState(ValueTree::fromXml(*xmlState));
 }
 
+//==============================================================================
 void PathSynthAudioProcessor::setPath()
 {
+    //todo check if it changed
     straightPath.clear();
 
     const Point<float> firstPointPos{
-        *parameters.getRawParameterValue("point0x"), *parameters.getRawParameterValue("point0y")
+        *parameters.getRawParameterValue("point0x"),
+        *parameters.getRawParameterValue("point0y")
     };
     straightPath.startNewSubPath(firstPointPos);
 
-    for (auto i = 1; i < 8; ++i)
+    for (auto i = 1; i < PathSynthConstants::numControlPoints; ++i)
     {
         const Point<float> pointPos{
             *parameters.getRawParameterValue("point" + String(i) + "x"),
@@ -260,8 +267,10 @@ void PathSynthAudioProcessor::setPath()
 
     const auto smoothPathBounds = processorPath.getBounds();
     processorPath.applyTransform(
-        AffineTransform::translation(-smoothPathBounds.getCentreX(), -smoothPathBounds.getCentreY()).followedBy(
-            AffineTransform::scale(1.0f / smoothPathBounds.getWidth(), 1.0f / smoothPathBounds.getHeight())));
+        AffineTransform::translation(
+            -smoothPathBounds.getCentreX(),
+            -smoothPathBounds.getCentreY()).followedBy(AffineTransform::scale(1.0f / smoothPathBounds.getWidth(),
+                                                                              1.0f / smoothPathBounds.getHeight())));
 }
 
 //==============================================================================
