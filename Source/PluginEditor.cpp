@@ -3,11 +3,14 @@
 
 //==============================================================================
 PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProcessor& p,
-                                                             AudioProcessorValueTreeState& apvts)
-    : AudioProcessorEditor(&p), processor(p), parameters(apvts), planeComponent(apvts)
+                                                             AudioProcessorValueTreeState& apvts, MidiKeyboardState& ks)
+    : AudioProcessorEditor(&p), processor(p), parameters(apvts), planeComponent(apvts), keyboardState(ks),
+      keyboardComponent(keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard)
 {
     addAndMakeVisible(planeComponent);
     addAndMakeVisible(waveDisplayComponent);
+
+    addAndMakeVisible(keyboardComponent);
 
     addAndMakeVisible(frequencySlider);
     frequencyAttachment.reset(new SliderAttachment(parameters, "frequency", frequencySlider));
@@ -21,8 +24,8 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     directionAttachment.reset(new ComboBoxAttachment(parameters, "direction", directionBox));
 
     auto& lookAndFeel = getLookAndFeel();
-    lookAndFeel.setColour(ResizableWindow::backgroundColourId,Colour(0xffe4753d));
-    lookAndFeel.setColour(ResizableWindow::backgroundColourId,Colour(0xffe4753d));
+    lookAndFeel.setColour(ResizableWindow::backgroundColourId, Colour(0xffe4753d));
+    lookAndFeel.setColour(ResizableWindow::backgroundColourId, Colour(0xffe4753d));
 
     setResizable(true, true);
     setResizeLimits(32, 32, 2048, 2048);
@@ -46,6 +49,8 @@ void PathSynthAudioProcessorEditor::resized()
 {
     auto bounds = getBounds();
 
+    keyboardComponent.setBounds(bounds.removeFromBottom(100));
+
     directionBox.setBounds(bounds.removeFromBottom(20));
     smoothSlider.setBounds(bounds.removeFromBottom(20));
     frequencySlider.setBounds(bounds.removeFromBottom(20));
@@ -59,6 +64,6 @@ void PathSynthAudioProcessorEditor::timerCallback()
     const Path smoothPath = planeComponent.update();
     const auto direction = *parameters.getRawParameterValue("direction");
     waveDisplayComponent.update(smoothPath, direction);
-
+    // TODO more efficient repaint
     repaint();
 }

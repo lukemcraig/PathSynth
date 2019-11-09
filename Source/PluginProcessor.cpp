@@ -221,7 +221,7 @@ bool PathSynthAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* PathSynthAudioProcessor::createEditor()
 {
-    return new PathSynthAudioProcessorEditor(*this, parameters);
+    return new PathSynthAudioProcessorEditor(*this, parameters, keyboardState);
 }
 
 //==============================================================================

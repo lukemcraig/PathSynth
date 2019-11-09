@@ -60,6 +60,8 @@ public:
 
 private:
     AudioProcessorValueTreeState parameters;
+    MidiKeyboardState keyboardState;
+
     float t{};
 
     Path processorPath{};
