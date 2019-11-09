@@ -36,6 +36,8 @@ private:
 
     float phaseIncrement{};
     float t{};
+    float level{};
+    float tailOff{};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathVoice)
 };

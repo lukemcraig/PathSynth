@@ -23,11 +23,23 @@ bool PathVoice::canPlaySound(SynthesiserSound* sound)
 void PathVoice::startNote(int midiNoteNumber, float velocity, SynthesiserSound* sound, int currentPitchWheelPosition)
 {
     auto frequency = MidiMessage::getMidiNoteInHertz(midiNoteNumber);
-    phaseIncrement = frequency / getSampleRate();//todo * oversampleFactor
+    phaseIncrement = frequency / getSampleRate(); //todo * oversampleFactor
+    level = velocity * 0.15f;
+    tailOff = 0.0f;
 }
 
 void PathVoice::stopNote(float velocity, bool allowTailOff)
 {
+    if (allowTailOff)
+    {
+        if (tailOff == 0.0f)
+            tailOff = 1.0f;
+    }
+    else
+    {
+        clearCurrentNote();
+        t = 0.0f;
+    }
 }
 
 void PathVoice::pitchWheelMoved(int newPitchWheelValue)
@@ -49,24 +61,60 @@ void PathVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int startSampl
     //const auto phaseIncrement = frequency / getSampleRate(); 
 
     auto* channelData = outputBuffer.getWritePointer(0);
-    for (auto sample = 0; sample < outputBuffer.getNumSamples(); ++sample)
+    if (tailOff > 0.0f)
     {
-        const auto point = processorPath.getPointAlongPath(length * t);
-
-        float value;
-        if (direction == 0)
-            value = point.getX();
-        else
-            value = point.getY();
-
-        channelData[sample] += value;
-
-        t += phaseIncrement;
-
-        if (t >= 1.0f)
+        for (auto sample = startSample; sample < numSamples; ++sample)
         {
-            t -= 1.0f;
-            if (t >= 1.0f) { jassertfalse; }
+            const auto point = processorPath.getPointAlongPath(length * t) ;
+
+            float value;
+            if (direction == 0)
+                value = point.getX();
+            else
+                value = point.getY();
+
+            channelData[sample] += value * level * tailOff;
+
+            t += phaseIncrement;
+
+            if (t >= 1.0f)
+            {
+                t -= 1.0f;
+                if (t >= 1.0f) { jassertfalse; }
+            }
+
+            tailOff *= 0.99f;
+
+            if (tailOff <= 0.005f)
+            {
+                clearCurrentNote();
+
+                t = 0.0f;
+                break;
+            }
+        }
+    }
+    else
+    {
+        for (auto sample = startSample; sample < numSamples; ++sample)
+        {
+            const auto point = processorPath.getPointAlongPath(length * t);
+
+            float value;
+            if (direction == 0)
+                value = point.getX();
+            else
+                value = point.getY();
+
+            channelData[sample] += value * level;
+
+            t += phaseIncrement;
+
+            if (t >= 1.0f)
+            {
+                t -= 1.0f;
+                if (t >= 1.0f) { jassertfalse; }
+            }
         }
     }
 }
