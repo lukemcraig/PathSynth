@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="vFdx7J" name="PathSynth" projectType="audioplug" jucerVersion="5.4.5"
-              reportAppUsage="0" pluginCharacteristicsValue="pluginIsSynth">
+              reportAppUsage="0" pluginCharacteristicsValue="pluginIsSynth"
+              bundleIdentifier="com.lukemcraig.pathsynth" companyName="Luke M. Craig"
+              pluginManufacturerCode="LMCA" pluginCode="LCPS" aaxIdentifier="com.lukemcraig.pathsynth">
   <MAINGROUP id="xDUIZN" name="PathSynth">
     <GROUP id="{1846AB2D-ABF1-CBCC-F291-C301634A6D20}" name="Source">
       <FILE id="uvDH72" name="PathSynthConstants.h" compile="0" resource="0"

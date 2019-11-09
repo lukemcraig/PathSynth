@@ -58,6 +58,11 @@ void PlaneComponent::paint(Graphics& g)
 
 void PlaneComponent::resized()
 {
+    updateControlPointPositions();
+}
+
+void PlaneComponent::updateControlPointPositions()
+{
     for (auto i = 0; i < controlPoints.size(); ++i)
     {
         auto x = *parameters.getRawParameterValue("point" + String(i) + "x");
@@ -78,6 +83,8 @@ void PlaneComponent::resized()
 
 Path PlaneComponent::update()
 {
+    updateControlPointPositions();
+
     const auto smoothing = *parameters.getRawParameterValue("smoothing") * 200.0f;
 
     straightPath.clear();

@@ -25,6 +25,8 @@ public:
 
     void paint(Graphics&) override;
 
+    void updateControlPointPositions();
+
     void resized() override;
 
     Path update();
