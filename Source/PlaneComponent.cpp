@@ -53,7 +53,7 @@ void PlaneComponent::paint(Graphics& g)
 
     // draw solid smooth path
     g.setColour(Colour(0xfff4e9d8));
-    g.strokePath(smoothPath, PathStrokeType(1.0));
+    g.strokePath(smoothPath, PathStrokeType(3.0));
 }
 
 void PlaneComponent::resized()

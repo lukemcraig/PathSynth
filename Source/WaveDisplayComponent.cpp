@@ -37,7 +37,7 @@ void WaveDisplayComponent::paint(Graphics& g)
     g.drawLine(0, halfHeight, width, halfHeight);
 
     g.setColour(Colour(0xfff4e9d8));
-    g.strokePath(signalPath, PathStrokeType(1.0));
+    g.strokePath(signalPath, PathStrokeType(2.0));
 }
 
 void WaveDisplayComponent::resized()
