@@ -52,7 +52,6 @@ void PathVoice::controllerMoved(int controllerNumber, int newControllerValue)
 
 void PathVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int startSample, int numSamples)
 {
-    DBG("renderNextBlock");
     const auto length = processorPath.getLength();
 
     const auto direction = *parameters.getRawParameterValue("direction");

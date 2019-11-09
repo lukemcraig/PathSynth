@@ -33,7 +33,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
             * MathConstants<float>::twoPi) * .25f;
         auto y = std::sin((static_cast<float>(i) / PathSynthConstants::numControlPoints)
             * MathConstants<float>::twoPi) * .25f;
-        DBG(String(x)+", "+String(y));
+
         params.push_back(std::make_unique<AudioParameterFloat>("point" + String(i) + "x",
                                                                "Point" + String(i) + "_X",
                                                                NormalisableRange<float>(-1.0f,
@@ -146,6 +146,7 @@ void PathSynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlo
     oversampledBuffer.clear();
 
     synthesiser.setCurrentPlaybackSampleRate(sampleRate); // todo * oversampleFactor
+    midiCollector.reset(sampleRate);
 }
 
 void PathSynthAudioProcessor::releaseResources()
@@ -183,12 +184,15 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     ScopedNoDenormals noDenormals;
     const auto totalNumOutputChannels = getTotalNumOutputChannels();
 
+    buffer.clear(0, 0, buffer.getNumSamples());
+
     setPath();
 
-    MidiBuffer incomingMidi;
-    keyboardState.processNextMidiBuffer(incomingMidi, 0,
+  /*  MidiBuffer incomingMidi;*/
+   // midiCollector.removeNextBlockOfMessages(midiMessages, buffer.getNumSamples());
+    keyboardState.processNextMidiBuffer(midiMessages, 0,
                                         buffer.getNumSamples(), true);
-    synthesiser.renderNextBlock(buffer, incomingMidi,
+    synthesiser.renderNextBlock(buffer, midiMessages,
                                 0, buffer.getNumSamples());
 
     // downsample the oversampled data

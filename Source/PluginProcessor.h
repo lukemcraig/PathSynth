@@ -61,6 +61,7 @@ public:
 private:
     AudioProcessorValueTreeState parameters;
     MidiKeyboardState keyboardState;
+    MidiMessageCollector midiCollector;
     Path processorPath{};
     int numVoices{1};
     Synthesiser synthesiser;
