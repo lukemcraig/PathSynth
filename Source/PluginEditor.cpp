@@ -52,7 +52,7 @@ void PathSynthAudioProcessorEditor::resized()
 
 void PathSynthAudioProcessorEditor::timerCallback()
 {
-    Path smoothPath = planeComponent.update();
+    const Path smoothPath = planeComponent.update();
     const auto direction = *parameters.getRawParameterValue("direction");
     waveDisplayComponent.update(smoothPath, direction);
 

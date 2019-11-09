@@ -12,12 +12,11 @@
 #include "ControlPointComponent.h"
 
 //==============================================================================
-ControlPointComponent::
-ControlPointComponent(AudioProcessorValueTreeState& parameters, const int index) :
-    parameters(parameters), index(index)
+ControlPointComponent::ControlPointComponent(AudioProcessorValueTreeState& parameters, const int index, int radius) :
+    parameters(parameters), index(index), radius(radius)
 {
-    constrainer.setMinimumOnscreenAmounts(0xffffff, 0xffffff,
-                                          0xffffff, 0xffffff);
+    constrainer.setMinimumOnscreenAmounts(radius, radius,
+                                          radius, radius);
 }
 
 ControlPointComponent::~ControlPointComponent()
@@ -26,7 +25,7 @@ ControlPointComponent::~ControlPointComponent()
 
 void ControlPointComponent::paint(Graphics& g)
 {
-    g.fillAll(Colours::white);
+    g.fillAll(Colour(0xaaffffff));
 }
 
 void ControlPointComponent::resized()

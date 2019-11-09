@@ -35,6 +35,7 @@ private:
     std::vector<std::unique_ptr<ControlPointComponent>> controlPoints;
     Path straightPath;
     Path smoothPath;
+    int controlPointRadius = 5;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlaneComponent)
 };

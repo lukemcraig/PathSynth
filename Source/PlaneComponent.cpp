@@ -17,7 +17,7 @@ PlaneComponent::PlaneComponent(AudioProcessorValueTreeState& parameters) : param
 {
     for (auto i = 0; i < PathSynthConstants::numControlPoints; ++i)
     {
-        controlPoints.emplace_back(std::make_unique<ControlPointComponent>(parameters, i));
+        controlPoints.emplace_back(std::make_unique<ControlPointComponent>(parameters, i, controlPointRadius));
     }
     for (auto&& controlPoint : controlPoints)
     {
@@ -63,16 +63,14 @@ void PlaneComponent::resized()
         auto x = *parameters.getRawParameterValue("point" + String(i) + "x");
         auto y = *parameters.getRawParameterValue("point" + String(i) + "y");
 
-        x += 1.0f;
-        y += 1.0f;
-
-        x *= 0.5f;
-        y *= 0.5f;
+        x = (x + 1.0f) * 0.5f;
+        y = (y + 1.0f) * 0.5f;
 
         x *= static_cast<float>(getWidth());
         y *= static_cast<float>(getHeight());
 
-        controlPoints[i]->setBounds(x, y, 10.0f, 10.0f);
+        const auto radius = controlPointRadius;
+        controlPoints[i]->setBounds(x - radius, y - radius, radius * 2, radius * 2);
     }
 }
 
@@ -82,11 +80,19 @@ Path PlaneComponent::update()
 
     straightPath.clear();
 
-    straightPath.startNewSubPath(controlPoints[0]->getPosition().toFloat());
+    const auto firstPointBounds = controlPoints[0]->getBounds();
+    auto firstPointPosition = firstPointBounds.getPosition().toFloat();
+    firstPointPosition.setX(firstPointPosition.getX() + (firstPointBounds.getWidth() * 0.5f));
+    firstPointPosition.setY(firstPointPosition.getY() + (firstPointBounds.getHeight() * 0.5f));
+    straightPath.startNewSubPath(firstPointPosition);
 
     for (auto i = 1; i < controlPoints.size(); ++i)
     {
-        straightPath.lineTo(controlPoints[i]->getPosition().toFloat());
+        const auto pointBounds = controlPoints[i]->getBounds();
+        auto pointPosition = pointBounds.getPosition().toFloat();
+        pointPosition.setX(pointPosition.getX() + (firstPointBounds.getWidth() * 0.5f));
+        pointPosition.setY(pointPosition.getY() + (firstPointBounds.getHeight() * 0.5f));
+        straightPath.lineTo(pointPosition);
     }
     straightPath.closeSubPath();
 

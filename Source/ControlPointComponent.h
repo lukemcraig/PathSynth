@@ -18,7 +18,7 @@
 class ControlPointComponent : public Component
 {
 public:
-    ControlPointComponent(AudioProcessorValueTreeState&, int);
+    ControlPointComponent(AudioProcessorValueTreeState&, int, int);
 
     ~ControlPointComponent();
 
@@ -34,6 +34,7 @@ private:
     AudioProcessorValueTreeState& parameters;
 
     int index;
+    int radius;
 
     ComponentDragger dragger;
     ComponentBoundsConstrainer constrainer;
