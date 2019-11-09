@@ -61,16 +61,18 @@ public:
 private:
     AudioProcessorValueTreeState parameters;
     MidiKeyboardState keyboardState;
+    Path processorPath{};
+    int numVoices{4};
+    Synthesiser synthesiser;
 
     float t{};
 
-    Path processorPath{};
     Path straightPath{};
 
     // TODO different resampling method
     LagrangeInterpolator resampler;
     AudioBuffer<float> oversampledBuffer;
-    const int oversampleFactor = 2;
+    const int oversampleFactor{2};
 
     //==============================================================================
     void setPath();
