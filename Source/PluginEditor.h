@@ -2,7 +2,6 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
-#include "ControlPointComponent.h"
 #include "PlaneComponent.h"
 #include "WaveDisplayComponent.h"
 
@@ -13,7 +12,7 @@ class PathSynthAudioProcessorEditor : public AudioProcessorEditor,
                                       public Timer
 {
 public:
-    PathSynthAudioProcessorEditor(PathSynthAudioProcessor&, AudioProcessorValueTreeState&);
+    PathSynthAudioProcessorEditor(PathSynthAudioProcessor&, AudioProcessorValueTreeState&, MidiKeyboardState&);
 
     ~PathSynthAudioProcessorEditor();
 
@@ -31,11 +30,11 @@ private:
     PathSynthAudioProcessor& processor;
     AudioProcessorValueTreeState& parameters;
 
+    MidiKeyboardState& keyboardState;
+    MidiKeyboardComponent keyboardComponent;
+
     WaveDisplayComponent waveDisplayComponent;
     PlaneComponent planeComponent;
-
-    Slider frequencySlider;
-    std::unique_ptr<SliderAttachment> frequencyAttachment;
 
     Slider smoothSlider;
     std::unique_ptr<SliderAttachment> smoothAttachment;

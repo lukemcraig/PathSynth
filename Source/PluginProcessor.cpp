@@ -1,18 +1,13 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "PathSynthConstants.h"
+#include "PathVoice.h"
+#include "PathSound.h"
 
 AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
     std::vector<std::unique_ptr<RangedAudioParameter>> params;
-    params.push_back(std::make_unique<AudioParameterFloat>("frequency",
-                                                           "Frequency",
-                                                           NormalisableRange<float>(1.0f,
-                                                                                    20000.0f,
-                                                                                    0.0f,
-                                                                                    0.25f,
-                                                                                    false),
-                                                           100.0f));
+
     params.push_back(std::make_unique<AudioParameterFloat>("smoothing",
                                                            "Smoothing",
                                                            NormalisableRange<float>(0.0f,
@@ -31,7 +26,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
             * MathConstants<float>::twoPi) * .25f;
         auto y = std::sin((static_cast<float>(i) / PathSynthConstants::numControlPoints)
             * MathConstants<float>::twoPi) * .25f;
-        DBG(String(x)+", "+String(y));
+
         params.push_back(std::make_unique<AudioParameterFloat>("point" + String(i) + "x",
                                                                "Point" + String(i) + "_X",
                                                                NormalisableRange<float>(-1.0f,
@@ -63,6 +58,11 @@ PathSynthAudioProcessor::PathSynthAudioProcessor(): AudioProcessor(
                                                                "PathSynth",
                                                                createParameterLayout())
 {
+    for (auto i = 0; i < numVoices; ++i)
+    {
+        synthesiser.addVoice(new PathVoice(parameters, processorPath));
+    }
+    synthesiser.addSound(new PathSound());
 }
 
 PathSynthAudioProcessor::~PathSynthAudioProcessor()
@@ -137,12 +137,15 @@ void PathSynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlo
     resampler.reset();
     oversampledBuffer.setSize(1, samplesPerBlock * oversampleFactor);
     oversampledBuffer.clear();
+
+    synthesiser.setCurrentPlaybackSampleRate(sampleRate); // todo * oversampleFactor
+    midiCollector.reset(sampleRate);
 }
 
 void PathSynthAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
-    // spare memory, etc.
+    // spare memory, etc.    
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -174,39 +177,20 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     ScopedNoDenormals noDenormals;
     const auto totalNumOutputChannels = getTotalNumOutputChannels();
 
+    buffer.clear(0, 0, buffer.getNumSamples());
+
     setPath();
-    const auto length = processorPath.getLength();
 
-    const auto direction = *parameters.getRawParameterValue("direction");
-
-    const auto frequency = *parameters.getRawParameterValue("frequency");
-    const auto phaseIncrement = frequency / (getSampleRate() * oversampleFactor);
-
-    auto* channelData = oversampledBuffer.getWritePointer(0);
-    for (auto sample = 0; sample < oversampledBuffer.getNumSamples(); ++sample)
-    {
-        const auto point = processorPath.getPointAlongPath(length * t);
-
-        float value;
-        if (direction == 0)
-            value = point.getX();
-        else
-            value = point.getY();
-
-        channelData[sample] = value;
-
-        t += phaseIncrement;
-
-        if (t >= 1.0f)
-        {
-            t -= 1.0f;
-            if (t >= 1.0f) { jassertfalse; }
-        }
-    }
+  /*  MidiBuffer incomingMidi;*/
+   // midiCollector.removeNextBlockOfMessages(midiMessages, buffer.getNumSamples());
+    keyboardState.processNextMidiBuffer(midiMessages, 0,
+                                        buffer.getNumSamples(), true);
+    synthesiser.renderNextBlock(buffer, midiMessages,
+                                0, buffer.getNumSamples());
 
     // downsample the oversampled data
-    const auto outputBuffer = buffer.getWritePointer(0);
-    resampler.process(oversampleFactor, channelData, outputBuffer, buffer.getNumSamples());
+    /* const auto outputBuffer = buffer.getWritePointer(0);
+      resampler.process(oversampleFactor, channelData, outputBuffer, buffer.getNumSamples());*/
 
     // copy the processed channel to all the other channels
     for (auto i = 1; i < totalNumOutputChannels; ++i)
@@ -221,7 +205,7 @@ bool PathSynthAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* PathSynthAudioProcessor::createEditor()
 {
-    return new PathSynthAudioProcessorEditor(*this, parameters);
+    return new PathSynthAudioProcessorEditor(*this, parameters, keyboardState);
 }
 
 //==============================================================================
