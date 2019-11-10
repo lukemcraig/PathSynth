@@ -16,8 +16,12 @@ public:
 
     ~PathSynthAudioProcessorEditor();
 
+    void makeLabelUpperCase(Label& label);
+
     //==============================================================================
     void paint(Graphics&) override;
+
+    static void setLabelAreaAboveCentered(Label& label, Rectangle<int>& labelArea);
 
     void resized() override;
 
@@ -36,21 +40,27 @@ private:
     WaveDisplayComponent waveDisplayComponent;
     PlaneComponent planeComponent;
 
+    Label smoothLabel;
     Slider smoothSlider;
     std::unique_ptr<SliderAttachment> smoothAttachment;
 
+    Label directionLabel;
     ComboBox directionBox;
     std::unique_ptr<ComboBoxAttachment> directionAttachment;
 
+    Label attackLabel;
     Slider attackSlider;
     std::unique_ptr<SliderAttachment> attackAttachment;
 
+    Label decayLabel;
     Slider decaySlider;
     std::unique_ptr<SliderAttachment> decayAttachment;
 
+    Label sustainLabel;
     Slider sustainSlider;
     std::unique_ptr<SliderAttachment> sustainAttachment;
 
+    Label releaseLabel;
     Slider releaseSlider;
     std::unique_ptr<SliderAttachment> releaseAttachment;
 

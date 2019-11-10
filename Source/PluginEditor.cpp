@@ -4,8 +4,12 @@
 //==============================================================================
 PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProcessor& p,
                                                              AudioProcessorValueTreeState& apvts, MidiKeyboardState& ks)
-    : AudioProcessorEditor(&p), processor(p), parameters(apvts), planeComponent(apvts), keyboardState(ks),
-      keyboardComponent(keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard)
+    : AudioProcessorEditor(&p),
+      processor(p),
+      parameters(apvts),
+      keyboardState(ks),
+      keyboardComponent(keyboardState, MidiKeyboardComponent::horizontalKeyboard),
+      planeComponent(apvts)
 {
     addAndMakeVisible(planeComponent);
     addAndMakeVisible(waveDisplayComponent);
@@ -22,22 +26,34 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
 
     {
         const auto adsrSliderStyle = Slider::LinearBar;
-
+		
+        attackLabel.setText("Attack", dontSendNotification);
+        makeLabelUpperCase(attackLabel);
+        addAndMakeVisible(attackLabel);
         attackSlider.setTextBoxStyle(Slider::TextBoxAbove, false, 64, 32);
         attackSlider.setSliderStyle(adsrSliderStyle);
         addAndMakeVisible(attackSlider);
         attackAttachment.reset(new SliderAttachment(parameters, "attack", attackSlider));
-
+		
+        decayLabel.setText("Decay", dontSendNotification);
+        makeLabelUpperCase(decayLabel);
+        addAndMakeVisible(decayLabel);
         decaySlider.setTextBoxStyle(Slider::TextBoxAbove, false, 64, 32);
         decaySlider.setSliderStyle(adsrSliderStyle);
         addAndMakeVisible(decaySlider);
         decayAttachment.reset(new SliderAttachment(parameters, "decay", decaySlider));
 
+        sustainLabel.setText("Sustain", dontSendNotification);
+        makeLabelUpperCase(sustainLabel);
+        addAndMakeVisible(sustainLabel);
         sustainSlider.setTextBoxStyle(Slider::TextBoxAbove, false, 64, 32);
         sustainSlider.setSliderStyle(adsrSliderStyle);
         addAndMakeVisible(sustainSlider);
         sustainAttachment.reset(new SliderAttachment(parameters, "sustain", sustainSlider));
 
+        releaseLabel.setText("Release", dontSendNotification);
+        makeLabelUpperCase(releaseLabel);
+        addAndMakeVisible(releaseLabel);
         releaseSlider.setTextBoxStyle(Slider::TextBoxAbove, false, 64, 32);
         releaseSlider.setSliderStyle(adsrSliderStyle);
         addAndMakeVisible(releaseSlider);
@@ -46,7 +62,7 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
 
     auto& lookAndFeel = getLookAndFeel();
     lookAndFeel.setColour(ResizableWindow::backgroundColourId, Colour(0xffe4753d));
-    lookAndFeel.setColour(ResizableWindow::backgroundColourId, Colour(0xffe4753d));
+    lookAndFeel.setColour(Label::textColourId, Colour(0xff513a1d));
 
     setResizable(true, true);
     setResizeLimits(32, 32, 2048, 2048);
@@ -59,11 +75,23 @@ PathSynthAudioProcessorEditor::~PathSynthAudioProcessorEditor()
 {
 }
 
+void PathSynthAudioProcessorEditor::makeLabelUpperCase(Label& label)
+{
+    label.setText(label.getText().toUpperCase(), dontSendNotification);
+}
+
 //==============================================================================
 void PathSynthAudioProcessorEditor::paint(Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+}
+
+void PathSynthAudioProcessorEditor::setLabelAreaAboveCentered(Label& label, Rectangle<int>& labelArea)
+{
+    label.setBounds(
+        labelArea.removeFromTop(16).withSizeKeepingCentre(
+            6 + label.getFont().getStringWidth(label.getText()), 16));
 }
 
 void PathSynthAudioProcessorEditor::resized()
@@ -72,10 +100,21 @@ void PathSynthAudioProcessorEditor::resized()
 
     auto adsrBounds = bounds.removeFromTop(bounds.proportionOfHeight(0.1f));
     auto adsrWidth = adsrBounds.getWidth() / 4.0f;
-    attackSlider.setBounds(adsrBounds.removeFromLeft(adsrWidth));
-    decaySlider.setBounds(adsrBounds.removeFromLeft(adsrWidth));
-    sustainSlider.setBounds(adsrBounds.removeFromLeft(adsrWidth));
-    releaseSlider.setBounds(adsrBounds.removeFromLeft(adsrWidth));
+
+    auto attackArea = adsrBounds.removeFromLeft(adsrWidth);
+    auto decayArea = adsrBounds.removeFromLeft(adsrWidth);
+    auto sustainArea = adsrBounds.removeFromLeft(adsrWidth);
+    auto releaseArea = adsrBounds.removeFromLeft(adsrWidth);
+
+    setLabelAreaAboveCentered(attackLabel, attackArea);
+    setLabelAreaAboveCentered(decayLabel, decayArea);
+    setLabelAreaAboveCentered(sustainLabel, sustainArea);
+    setLabelAreaAboveCentered(releaseLabel, releaseArea);
+
+    attackSlider.setBounds(attackArea);
+    decaySlider.setBounds(decayArea);
+    sustainSlider.setBounds(sustainArea);
+    releaseSlider.setBounds(releaseArea);
 
     keyboardComponent.setBounds(bounds.removeFromBottom(100));
 
