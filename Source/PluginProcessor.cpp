@@ -181,8 +181,8 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
     setPath();
 
-  /*  MidiBuffer incomingMidi;*/
-   // midiCollector.removeNextBlockOfMessages(midiMessages, buffer.getNumSamples());
+    /*  MidiBuffer incomingMidi;*/
+    //midiCollector.removeNextBlockOfMessages(midiMessages, buffer.getNumSamples());
     keyboardState.processNextMidiBuffer(midiMessages, 0,
                                         buffer.getNumSamples(), true);
     synthesiser.renderNextBlock(buffer, midiMessages,
@@ -195,6 +195,8 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     // copy the processed channel to all the other channels
     for (auto i = 1; i < totalNumOutputChannels; ++i)
         buffer.copyFrom(i, 0, buffer, 0, 0, buffer.getNumSamples());
+
+    midiMessages.clear();
 }
 
 //==============================================================================
