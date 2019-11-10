@@ -20,6 +20,30 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     directionBox.addItem("Y", 2);
     directionAttachment.reset(new ComboBoxAttachment(parameters, "direction", directionBox));
 
+    {
+        const auto adsrSliderStyle = Slider::LinearBar;
+
+        attackSlider.setTextBoxStyle(Slider::TextBoxAbove, false, 64, 32);
+        attackSlider.setSliderStyle(adsrSliderStyle);
+        addAndMakeVisible(attackSlider);
+        attackAttachment.reset(new SliderAttachment(parameters, "attack", attackSlider));
+
+        decaySlider.setTextBoxStyle(Slider::TextBoxAbove, false, 64, 32);
+        decaySlider.setSliderStyle(adsrSliderStyle);
+        addAndMakeVisible(decaySlider);
+        decayAttachment.reset(new SliderAttachment(parameters, "decay", decaySlider));
+
+        sustainSlider.setTextBoxStyle(Slider::TextBoxAbove, false, 64, 32);
+        sustainSlider.setSliderStyle(adsrSliderStyle);
+        addAndMakeVisible(sustainSlider);
+        sustainAttachment.reset(new SliderAttachment(parameters, "sustain", sustainSlider));
+
+        releaseSlider.setTextBoxStyle(Slider::TextBoxAbove, false, 64, 32);
+        releaseSlider.setSliderStyle(adsrSliderStyle);
+        addAndMakeVisible(releaseSlider);
+        releaseAttachment.reset(new SliderAttachment(parameters, "release", releaseSlider));
+    }
+
     auto& lookAndFeel = getLookAndFeel();
     lookAndFeel.setColour(ResizableWindow::backgroundColourId, Colour(0xffe4753d));
     lookAndFeel.setColour(ResizableWindow::backgroundColourId, Colour(0xffe4753d));
@@ -45,6 +69,13 @@ void PathSynthAudioProcessorEditor::paint(Graphics& g)
 void PathSynthAudioProcessorEditor::resized()
 {
     auto bounds = getBounds();
+
+    auto adsrBounds = bounds.removeFromTop(bounds.proportionOfHeight(0.1f));
+    auto adsrWidth = adsrBounds.getWidth() / 4.0f;
+    attackSlider.setBounds(adsrBounds.removeFromLeft(adsrWidth));
+    decaySlider.setBounds(adsrBounds.removeFromLeft(adsrWidth));
+    sustainSlider.setBounds(adsrBounds.removeFromLeft(adsrWidth));
+    releaseSlider.setBounds(adsrBounds.removeFromLeft(adsrWidth));
 
     keyboardComponent.setBounds(bounds.removeFromBottom(100));
 

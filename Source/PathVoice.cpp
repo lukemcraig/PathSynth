@@ -23,11 +23,9 @@ bool PathVoice::canPlaySound(SynthesiserSound* sound)
 
 void PathVoice::startNote(int midiNoteNumber, float velocity, SynthesiserSound* sound, int currentPitchWheelPosition)
 {
-    //DBG("startNote");
-    auto frequency = MidiMessage::getMidiNoteInHertz(midiNoteNumber);
+    const auto frequency = MidiMessage::getMidiNoteInHertz(midiNoteNumber);
     phaseIncrement = frequency / getSampleRate(); //todo * oversampleFactor
     level = velocity * 0.15f;
-    //DBG(level);
     envelope.noteOn();
 }
 
@@ -94,8 +92,7 @@ void PathVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int startSampl
                 }
             }
             else
-            {
-                //DBG("renderNextBlock clearCurrentNote");
+            {                
                 clearCurrentNote();
                 phaseIncrement = 0.0f;
                 envelope.reset();

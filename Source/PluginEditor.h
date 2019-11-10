@@ -42,5 +42,17 @@ private:
     ComboBox directionBox;
     std::unique_ptr<ComboBoxAttachment> directionAttachment;
 
+    Slider attackSlider;
+    std::unique_ptr<SliderAttachment> attackAttachment;
+
+    Slider decaySlider;
+    std::unique_ptr<SliderAttachment> decayAttachment;
+
+    Slider sustainSlider;
+    std::unique_ptr<SliderAttachment> sustainAttachment;
+
+    Slider releaseSlider;
+    std::unique_ptr<SliderAttachment> releaseAttachment;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathSynthAudioProcessorEditor)
 };
