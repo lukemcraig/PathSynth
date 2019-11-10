@@ -45,6 +45,38 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                                                         false),
                                                                y));
     }
+    params.push_back(std::make_unique<AudioParameterFloat>("attack",
+                                                           "Attack",
+                                                           NormalisableRange<float>(0.0f,
+                                                                                    20000.0f,
+                                                                                    0.0f,
+                                                                                    0.2f,
+                                                                                    false),
+                                                           1.0f));
+    params.push_back(std::make_unique<AudioParameterFloat>("decay",
+                                                           "Decay",
+                                                           NormalisableRange<float>(1.0f,
+                                                                                    60000.0f,
+                                                                                    0.0f,
+                                                                                    0.2f,
+                                                                                    false),
+                                                           600.0f));
+    params.push_back(std::make_unique<AudioParameterFloat>("sustain",
+                                                           "Sustain",
+                                                           NormalisableRange<float>(0.0f,
+                                                                                    1.0,
+                                                                                    0.0f,
+                                                                                    1.0f,
+                                                                                    false),
+                                                           1.0f));
+    params.push_back(std::make_unique<AudioParameterFloat>("release",
+                                                           "Release",
+                                                           NormalisableRange<float>(1.0f,
+                                                                                    60000.0f,
+                                                                                    0.0f,
+                                                                                    0.2f,
+                                                                                    false),
+                                                           50.0f));
     return {params.begin(), params.end()};
 }
 
