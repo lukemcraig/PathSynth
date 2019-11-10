@@ -109,6 +109,10 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                            {
                                                                return String(Decibels::gainToDecibels(value), 2) +
                                                                    " dB";
+                                                           },
+                                                           [](const String& text)
+                                                           {
+                                                               return Decibels::decibelsToGain(text.getFloatValue());
                                                            }));
     params.push_back(std::make_unique<AudioParameterFloat>("release",
                                                            "Release",
