@@ -60,6 +60,15 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                                if (value >= 1000.0f)
                                                                    return String(value / 1000.0f, 2) + " s";
                                                                return String(value, 2) + " ms";
+                                                           },
+                                                           [](const String& text)
+                                                           {
+                                                               if (text.endsWith(" s") ||
+                                                                   (text.endsWith("s") && !text.endsWith("ms")))
+                                                               {
+                                                                   return text.getFloatValue() * 1000.0f;
+                                                               }
+                                                               return text.getFloatValue();
                                                            }));
     params.push_back(std::make_unique<AudioParameterFloat>("decay",
                                                            "Decay",
@@ -76,6 +85,15 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                                if (value >= 1000.0f)
                                                                    return String(value / 1000.0f, 2) + " s";
                                                                return String(value, 2) + " ms";
+                                                           },
+                                                           [](const String& text)
+                                                           {
+                                                               if (text.endsWith(" s") ||
+                                                                   (text.endsWith("s") && !text.endsWith("ms")))
+                                                               {
+                                                                   return text.getFloatValue() * 1000.0f;
+                                                               }
+                                                               return text.getFloatValue();
                                                            }));
     params.push_back(std::make_unique<AudioParameterFloat>("sustain",
                                                            "Sustain",
@@ -107,6 +125,15 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                                if (value >= 1000.0f)
                                                                    return String(value / 1000.0f, 2) + " s";
                                                                return String(value, 2) + " ms";
+                                                           },
+                                                           [](const String& text)
+                                                           {
+                                                               if (text.endsWith(" s") ||
+                                                                   (text.endsWith("s") && !text.endsWith("ms")))
+                                                               {
+                                                                   return text.getFloatValue() * 1000.0f;
+                                                               }
+                                                               return text.getFloatValue();
                                                            }));
     return {params.begin(), params.end()};
 }
