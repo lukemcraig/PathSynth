@@ -1,6 +1,21 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+void PathSynthAudioProcessorEditor::setupAdsrControl(Label& label, Slider& slider,
+                                                     std::unique_ptr<PathSynthAudioProcessorEditor::SliderAttachment>&
+                                                     attachment, const String& labelText, const String& parameterId)
+{
+    label.setText(labelText, dontSendNotification);
+    makeLabelUpperCase(label);
+    addAndMakeVisible(label);
+
+    slider.setTextBoxStyle(Slider::TextBoxAbove, false, 64, 32);
+    slider.setSliderStyle(Slider::LinearBar);
+    addAndMakeVisible(slider);
+
+    attachment.reset(new SliderAttachment(parameters, parameterId, slider));
+}
+
 //==============================================================================
 PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProcessor& p,
                                                              AudioProcessorValueTreeState& apvts, MidiKeyboardState& ks)
@@ -24,41 +39,10 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     directionBox.addItem("Y", 2);
     directionAttachment.reset(new ComboBoxAttachment(parameters, "direction", directionBox));
 
-    {
-        const auto adsrSliderStyle = Slider::LinearBar;
-		
-        attackLabel.setText("Attack", dontSendNotification);
-        makeLabelUpperCase(attackLabel);
-        addAndMakeVisible(attackLabel);
-        attackSlider.setTextBoxStyle(Slider::TextBoxAbove, false, 64, 32);
-        attackSlider.setSliderStyle(adsrSliderStyle);
-        addAndMakeVisible(attackSlider);
-        attackAttachment.reset(new SliderAttachment(parameters, "attack", attackSlider));
-		
-        decayLabel.setText("Decay", dontSendNotification);
-        makeLabelUpperCase(decayLabel);
-        addAndMakeVisible(decayLabel);
-        decaySlider.setTextBoxStyle(Slider::TextBoxAbove, false, 64, 32);
-        decaySlider.setSliderStyle(adsrSliderStyle);
-        addAndMakeVisible(decaySlider);
-        decayAttachment.reset(new SliderAttachment(parameters, "decay", decaySlider));
-
-        sustainLabel.setText("Sustain", dontSendNotification);
-        makeLabelUpperCase(sustainLabel);
-        addAndMakeVisible(sustainLabel);
-        sustainSlider.setTextBoxStyle(Slider::TextBoxAbove, false, 64, 32);
-        sustainSlider.setSliderStyle(adsrSliderStyle);
-        addAndMakeVisible(sustainSlider);
-        sustainAttachment.reset(new SliderAttachment(parameters, "sustain", sustainSlider));
-
-        releaseLabel.setText("Release", dontSendNotification);
-        makeLabelUpperCase(releaseLabel);
-        addAndMakeVisible(releaseLabel);
-        releaseSlider.setTextBoxStyle(Slider::TextBoxAbove, false, 64, 32);
-        releaseSlider.setSliderStyle(adsrSliderStyle);
-        addAndMakeVisible(releaseSlider);
-        releaseAttachment.reset(new SliderAttachment(parameters, "release", releaseSlider));
-    }
+    setupAdsrControl(attackLabel, attackSlider, attackAttachment, "Attack", "attack");
+    setupAdsrControl(decayLabel, decaySlider, decayAttachment, "Decay", "decay");
+    setupAdsrControl(attackLabel, attackSlider, attackAttachment, "Sustain", "sustain");
+    setupAdsrControl(releaseLabel, releaseSlider, releaseAttachment, "Release", "release");
 
     auto& lookAndFeel = getLookAndFeel();
     lookAndFeel.setColour(ResizableWindow::backgroundColourId, Colour(0xffe4753d));
