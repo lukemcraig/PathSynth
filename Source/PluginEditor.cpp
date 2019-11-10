@@ -38,6 +38,7 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     auto& lookAndFeel = getLookAndFeel();
     lookAndFeel.setColour(ResizableWindow::backgroundColourId, Colour(0xffe4753d));
     lookAndFeel.setColour(Label::textColourId, Colours::black);
+    lookAndFeel.setColour(Slider::backgroundColourId, Colours::red);
 
     setResizable(true, true);
     setResizeLimits(32, 32, 2048, 2048);
@@ -129,6 +130,4 @@ void PathSynthAudioProcessorEditor::timerCallback()
     const Path smoothPath = planeComponent.update();
     const auto direction = *parameters.getRawParameterValue("direction");
     waveDisplayComponent.update(smoothPath, direction);
-    // TODO more efficient repaint
-    repaint();
 }

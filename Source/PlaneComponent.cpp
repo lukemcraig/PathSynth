@@ -109,5 +109,7 @@ Path PlaneComponent::update()
 
     float dashes[] = {2.0f, 3.0f, 4.0f, 5.0f};
     PathStrokeType(1.0).createDashedStroke(straightPath, straightPath, dashes, 4);
+    //todo more effecient repaint
+    repaint();
     return smoothPath;
 }
