@@ -12,11 +12,16 @@ class PathSynthAudioProcessorEditor : public AudioProcessorEditor,
                                       public Timer
 {
 public:
+
     PathSynthAudioProcessorEditor(PathSynthAudioProcessor&, AudioProcessorValueTreeState&, MidiKeyboardState&);
 
     ~PathSynthAudioProcessorEditor();
 
     void makeLabelUpperCase(Label& label);
+
+    void setupAdsrControl(Label& label, Slider& slider,
+                          std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment>& attachment,
+                          const String& labelText, const String& parameterId);
 
     //==============================================================================
     void paint(Graphics&) override;
