@@ -32,6 +32,8 @@ public:
 
     void renderNextBlock(AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override;
 
+    void setCurrentPlaybackSampleRate(double newRate) override;
+
 private:
     AudioProcessorValueTreeState& parameters;
     Path& processorPath;
@@ -39,7 +41,9 @@ private:
     float phaseIncrement{};
     float t{};
     float level{};
-    float tailOff{};
+
+    ADSR::Parameters envParams{0.2f, 0.1f, 1.0f, 1.0f};
+    ADSR envelope;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathVoice)
 };

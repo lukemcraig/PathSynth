@@ -13,6 +13,7 @@
 
 PathVoice::PathVoice(AudioProcessorValueTreeState& apvts, Path& pp) : parameters(apvts), processorPath(pp)
 {
+    envelope.setParameters(envParams);
 }
 
 bool PathVoice::canPlaySound(SynthesiserSound* sound)
@@ -22,23 +23,28 @@ bool PathVoice::canPlaySound(SynthesiserSound* sound)
 
 void PathVoice::startNote(int midiNoteNumber, float velocity, SynthesiserSound* sound, int currentPitchWheelPosition)
 {
+    DBG("startNote");
     auto frequency = MidiMessage::getMidiNoteInHertz(midiNoteNumber);
     phaseIncrement = frequency / getSampleRate(); //todo * oversampleFactor
     level = velocity * 0.15f;
-    tailOff = 0.0f;
+    //DBG(level);
+    envelope.noteOn();
 }
 
 void PathVoice::stopNote(float velocity, bool allowTailOff)
 {
+    DBG(velocity);
     if (allowTailOff)
     {
-        if (tailOff == 0.0f)
-            tailOff = 1.0f;
+        DBG("stopNote allowTailOff");
+        envelope.noteOff();
     }
     else
     {
+        DBG("stopNote");
         clearCurrentNote();
         phaseIncrement = 0.0f;
+        envelope.reset();
     }
 }
 
@@ -78,33 +84,32 @@ void PathVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int startSampl
         const auto direction = *parameters.getRawParameterValue("direction");
 
         auto* channelData = outputBuffer.getWritePointer(0);
-        if (tailOff > 0.0f)
+
+        for (auto sample = startSample; sample < numSamples; ++sample)
         {
-            for (auto sample = startSample; sample < numSamples; ++sample)
+            if (envelope.isActive())
             {
-                const auto value = getNextSample(length, direction);
-
-                channelData[sample] += value * level * tailOff;
-
-                tailOff *= 0.5f;
-
-                if (tailOff <= 0.005f)
+                const auto envValue = envelope.getNextSample();
+                if (envValue != 0.0f)
                 {
-                    clearCurrentNote();
-
-                    phaseIncrement = 0.0f;
-                    break;
+                    const auto value = getNextSample(length, direction);
+                    channelData[sample] += value * level * envValue;
                 }
             }
-        }
-        else
-        {
-            for (auto sample = startSample; sample < numSamples; ++sample)
+            else
             {
-                const auto value = getNextSample(length, direction);
-
-                channelData[sample] += value * level;
+                DBG("renderNextBlock clearCurrentNote");
+                clearCurrentNote();
+                phaseIncrement = 0.0f;
+                break;
             }
         }
     }
+}
+
+void PathVoice::setCurrentPlaybackSampleRate(double newRate)
+{
+    SynthesiserVoice::setCurrentPlaybackSampleRate(newRate);
+    if (newRate != 0)
+        envelope.setSampleRate(newRate);
 }
