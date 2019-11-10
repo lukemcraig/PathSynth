@@ -52,7 +52,15 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                                                     0.0f,
                                                                                     0.2f,
                                                                                     false),
-                                                           1.0f));
+                                                           1.0f,
+                                                           String(),
+                                                           AudioProcessorParameter::genericParameter,
+                                                           [](const float value, int /*maximumStringLength*/)
+                                                           {
+                                                               if (value >= 1000.0f)
+                                                                   return String(value / 1000.0f, 2) + " s";
+                                                               return String(value, 2) + " ms";
+                                                           }));
     params.push_back(std::make_unique<AudioParameterFloat>("decay",
                                                            "Decay",
                                                            NormalisableRange<float>(1.0f,
@@ -60,7 +68,15 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                                                     0.0f,
                                                                                     0.2f,
                                                                                     false),
-                                                           600.0f));
+                                                           600.0f,
+                                                           String(),
+                                                           AudioProcessorParameter::genericParameter,
+                                                           [](const float value, int /*maximumStringLength*/)
+                                                           {
+                                                               if (value >= 1000.0f)
+                                                                   return String(value / 1000.0f, 2) + " s";
+                                                               return String(value, 2) + " ms";
+                                                           }));
     params.push_back(std::make_unique<AudioParameterFloat>("sustain",
                                                            "Sustain",
                                                            NormalisableRange<float>(0.0f,
@@ -68,7 +84,14 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                                                     0.0f,
                                                                                     1.0f,
                                                                                     false),
-                                                           1.0f));
+                                                           1.0f,
+                                                           String(),
+                                                           AudioProcessorParameter::genericParameter,
+                                                           [](const float value, int /*maximumStringLength*/)
+                                                           {
+                                                               return String(Decibels::gainToDecibels(value), 2) +
+                                                                   " dB";
+                                                           }));
     params.push_back(std::make_unique<AudioParameterFloat>("release",
                                                            "Release",
                                                            NormalisableRange<float>(1.0f,
@@ -76,7 +99,15 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                                                     0.0f,
                                                                                     0.2f,
                                                                                     false),
-                                                           50.0f));
+                                                           50.0f,
+                                                           String(),
+                                                           AudioProcessorParameter::genericParameter,
+                                                           [](const float value, int /*maximumStringLength*/)
+                                                           {
+                                                               if (value >= 1000.0f)
+                                                                   return String(value / 1000.0f, 2) + " s";
+                                                               return String(value, 2) + " ms";
+                                                           }));
     return {params.begin(), params.end()};
 }
 
