@@ -36,9 +36,6 @@ private:
     WaveDisplayComponent waveDisplayComponent;
     PlaneComponent planeComponent;
 
-    Slider frequencySlider;
-    std::unique_ptr<SliderAttachment> frequencyAttachment;
-
     Slider smoothSlider;
     std::unique_ptr<SliderAttachment> smoothAttachment;
 

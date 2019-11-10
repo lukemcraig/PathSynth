@@ -7,14 +7,7 @@
 AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
     std::vector<std::unique_ptr<RangedAudioParameter>> params;
-    params.push_back(std::make_unique<AudioParameterFloat>("frequency",
-                                                           "Frequency",
-                                                           NormalisableRange<float>(1.0f,
-                                                                                    20000.0f,
-                                                                                    0.0f,
-                                                                                    0.25f,
-                                                                                    false),
-                                                           100.0f));
+
     params.push_back(std::make_unique<AudioParameterFloat>("smoothing",
                                                            "Smoothing",
                                                            NormalisableRange<float>(0.0f,

@@ -28,6 +28,8 @@ public:
 
     void controllerMoved(int controllerNumber, int newControllerValue) override;
 
+    float getNextSample(float length, float direction);
+
     void renderNextBlock(AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override;
 
 private:

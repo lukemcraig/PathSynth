@@ -38,7 +38,7 @@ void PathVoice::stopNote(float velocity, bool allowTailOff)
     else
     {
         clearCurrentNote();
-        t = 0.0f;
+        phaseIncrement = 0.0f;
     }
 }
 
@@ -50,69 +50,60 @@ void PathVoice::controllerMoved(int controllerNumber, int newControllerValue)
 {
 }
 
+float PathVoice::getNextSample(const float length, const float direction)
+{
+    const auto point = processorPath.getPointAlongPath(length * t);
+    float value;
+    if (direction == 0)
+        value = point.getX();
+    else
+        value = point.getY();
+
+    t += phaseIncrement;
+
+    if (t >= 1.0f)
+    {
+        t -= 1.0f;
+        if (t >= 1.0f) { jassertfalse; }
+    }
+    return value;
+}
+
 void PathVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int startSample, int numSamples)
 {
-    const auto length = processorPath.getLength();
-
-    const auto direction = *parameters.getRawParameterValue("direction");
-
-    //const auto frequency = *parameters.getRawParameterValue("frequency");
-    //const auto phaseIncrement = frequency / getSampleRate(); 
-
-    auto* channelData = outputBuffer.getWritePointer(0);
-    if (tailOff > 0.0f)
+    if (phaseIncrement != 0.0f)
     {
-        for (auto sample = startSample; sample < numSamples; ++sample)
+        const auto length = processorPath.getLength();
+
+        const auto direction = *parameters.getRawParameterValue("direction");
+
+        auto* channelData = outputBuffer.getWritePointer(0);
+        if (tailOff > 0.0f)
         {
-            const auto point = processorPath.getPointAlongPath(length * t) ;
-
-            float value;
-            if (direction == 0)
-                value = point.getX();
-            else
-                value = point.getY();
-
-            channelData[sample] += value * level * tailOff;
-
-            t += phaseIncrement;
-
-            if (t >= 1.0f)
+            for (auto sample = startSample; sample < numSamples; ++sample)
             {
-                t -= 1.0f;
-                if (t >= 1.0f) { jassertfalse; }
-            }
+                const auto value = getNextSample(length, direction);
 
-            tailOff *= 0.99f;
+                channelData[sample] += value * level * tailOff;
 
-            if (tailOff <= 0.005f)
-            {
-                clearCurrentNote();
+                tailOff *= 0.5f;
 
-                t = 0.0f;
-                break;
+                if (tailOff <= 0.005f)
+                {
+                    clearCurrentNote();
+
+                    phaseIncrement = 0.0f;
+                    break;
+                }
             }
         }
-    }
-    else
-    {
-        for (auto sample = startSample; sample < numSamples; ++sample)
+        else
         {
-            const auto point = processorPath.getPointAlongPath(length * t);
-
-            float value;
-            if (direction == 0)
-                value = point.getX();
-            else
-                value = point.getY();
-
-            channelData[sample] += value * level;
-
-            t += phaseIncrement;
-
-            if (t >= 1.0f)
+            for (auto sample = startSample; sample < numSamples; ++sample)
             {
-                t -= 1.0f;
-                if (t >= 1.0f) { jassertfalse; }
+                const auto value = getNextSample(length, direction);
+
+                channelData[sample] += value * level;
             }
         }
     }

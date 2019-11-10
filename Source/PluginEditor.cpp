@@ -12,9 +12,6 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
 
     addAndMakeVisible(keyboardComponent);
 
-    addAndMakeVisible(frequencySlider);
-    frequencyAttachment.reset(new SliderAttachment(parameters, "frequency", frequencySlider));
-
     addAndMakeVisible(smoothSlider);
     smoothAttachment.reset(new SliderAttachment(parameters, "smoothing", smoothSlider));
 
@@ -53,7 +50,6 @@ void PathSynthAudioProcessorEditor::resized()
 
     directionBox.setBounds(bounds.removeFromBottom(20));
     smoothSlider.setBounds(bounds.removeFromBottom(20));
-    frequencySlider.setBounds(bounds.removeFromBottom(20));
 
     planeComponent.setBounds(bounds.removeFromLeft(bounds.proportionOfWidth(0.5)).reduced(10));
     waveDisplayComponent.setBounds(bounds.reduced(10));
