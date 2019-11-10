@@ -92,7 +92,7 @@ PathSynthAudioProcessor::PathSynthAudioProcessor(): AudioProcessor(
 {
     for (auto i = 0; i < numVoices; ++i)
     {
-        synthesiser.addVoice(new PathVoice(parameters, processorPath));
+        synthesiser.addVoice(new PathVoice(parameters, processorPath, envParams));
     }
     synthesiser.addSound(new PathSound());
 }
@@ -213,8 +213,11 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
     setPath();
 
-    /*  MidiBuffer incomingMidi;*/
-    //midiCollector.removeNextBlockOfMessages(midiMessages, buffer.getNumSamples());
+    envParams.attack = *parameters.getRawParameterValue("attack") / 1000.0f;
+    envParams.decay = *parameters.getRawParameterValue("decay") / 1000.0f;
+    envParams.sustain = *parameters.getRawParameterValue("sustain");
+    envParams.release = *parameters.getRawParameterValue("release") / 1000.0f;
+
     keyboardState.processNextMidiBuffer(midiMessages, 0,
                                         buffer.getNumSamples(), true);
     synthesiser.renderNextBlock(buffer, midiMessages,

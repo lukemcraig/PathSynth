@@ -14,7 +14,7 @@
 class PathVoice : public SynthesiserVoice
 {
 public:
-    PathVoice(AudioProcessorValueTreeState&, Path&);
+    PathVoice(AudioProcessorValueTreeState&, Path&, ADSR::Parameters&);
 
     ~PathVoice() = default;
 
@@ -42,7 +42,7 @@ private:
     float t{};
     float level{};
 
-    ADSR::Parameters envParams{0.2f, 0.1f, 1.0f, 1.0f};
+    ADSR::Parameters& envParams;
     ADSR envelope;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathVoice)

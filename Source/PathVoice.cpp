@@ -11,7 +11,9 @@
 #include "PathVoice.h"
 #include "PathSound.h"
 
-PathVoice::PathVoice(AudioProcessorValueTreeState& apvts, Path& pp) : parameters(apvts), processorPath(pp)
+PathVoice::PathVoice(AudioProcessorValueTreeState& apvts, Path& pp, ADSR::Parameters& envParams) : parameters(apvts),
+                                                                                                   processorPath(pp),
+                                                                                                   envParams(envParams)
 {
     envelope.setParameters(envParams);
 }
@@ -74,6 +76,9 @@ void PathVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int startSampl
 {
     if (phaseIncrement != 0.0f)
     {
+        envelope.setParameters(envParams);
+
+        // todo don't need to do this for every voice
         const auto length = processorPath.getLength();
 
         const auto direction = *parameters.getRawParameterValue("direction");
@@ -92,7 +97,7 @@ void PathVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int startSampl
                 }
             }
             else
-            {                
+            {
                 clearCurrentNote();
                 phaseIncrement = 0.0f;
                 envelope.reset();

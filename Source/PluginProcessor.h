@@ -64,6 +64,7 @@ private:
     MidiMessageCollector midiCollector;
     Path processorPath{};
     int numVoices{10};
+    ADSR::Parameters envParams;
     Synthesiser synthesiser;
 
     float t{};
