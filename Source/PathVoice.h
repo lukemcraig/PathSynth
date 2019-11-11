@@ -24,6 +24,10 @@ public:
 
     void stopNote(float velocity, bool allowTailOff) override;
 
+    void updatePitchBend(int newPitchWheelValue);
+
+    void updatePhaseIncrement();
+
     void pitchWheelMoved(int newPitchWheelValue) override;
 
     void controllerMoved(int controllerNumber, int newControllerValue) override;
@@ -38,6 +42,11 @@ private:
     AudioProcessorValueTreeState& parameters;
     Path& processorPath;
 
+    // todo parameterize
+    float frequencyOfA = 440.0f;
+
+    int currentNoteNumber;
+    float pitchBend;
     float phaseIncrement{};
     float t{};
     float level{};

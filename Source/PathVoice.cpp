@@ -25,8 +25,10 @@ bool PathVoice::canPlaySound(SynthesiserSound* sound)
 
 void PathVoice::startNote(int midiNoteNumber, float velocity, SynthesiserSound* sound, int currentPitchWheelPosition)
 {
-    const auto frequency = MidiMessage::getMidiNoteInHertz(midiNoteNumber);
-    phaseIncrement = frequency / getSampleRate(); //todo * oversampleFactor
+    currentNoteNumber = midiNoteNumber;
+    updatePitchBend(currentPitchWheelPosition);
+
+    updatePhaseIncrement();
     level = velocity;
     envelope.noteOn();
 }
@@ -45,8 +47,28 @@ void PathVoice::stopNote(float velocity, bool allowTailOff)
     }
 }
 
+void PathVoice::updatePitchBend(int newPitchWheelValue)
+{
+    if (newPitchWheelValue == 16383)
+        pitchBend = 1.0f;
+    else if (newPitchWheelValue == 8192)
+        pitchBend = 0.0f;
+    else if (newPitchWheelValue == 0)
+        pitchBend = -1.0f;
+    else
+        pitchBend = ((newPitchWheelValue / 16383.0f) * 2.0f) - 1.0f;
+}
+
+void PathVoice::updatePhaseIncrement()
+{
+    const auto frequency = frequencyOfA * std::pow(2.0f, (currentNoteNumber + pitchBend - 69.0f) / 12.0f);
+    phaseIncrement = frequency / getSampleRate(); //todo * oversampleFactor
+}
+
 void PathVoice::pitchWheelMoved(int newPitchWheelValue)
 {
+    updatePitchBend(newPitchWheelValue);
+    updatePhaseIncrement();
 }
 
 void PathVoice::controllerMoved(int controllerNumber, int newControllerValue)
