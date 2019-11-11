@@ -9,7 +9,8 @@
 /**
 */
 class PathSynthAudioProcessorEditor : public AudioProcessorEditor,
-                                      public Timer
+                                      public Timer,
+                                      public Slider::Listener
 {
 public:
 
@@ -32,6 +33,8 @@ public:
 
     void timerCallback() override;
 
+    void sliderValueChanged(Slider* slider) override;
+
 private:
     typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
     typedef AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
@@ -44,6 +47,9 @@ private:
 
     WaveDisplayComponent waveDisplayComponent;
     PlaneComponent planeComponent;
+
+    Label voicesLabel;
+    Slider voicesSlider;
 
     Label smoothLabel;
     Slider smoothSlider;

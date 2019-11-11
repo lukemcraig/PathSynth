@@ -16,6 +16,14 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
 
     addAndMakeVisible(keyboardComponent);
 
+    voicesLabel.setText("Max Voices", dontSendNotification);
+    makeLabelUpperCase(voicesLabel);
+    addAndMakeVisible(voicesLabel);
+    addAndMakeVisible(voicesSlider);
+    voicesSlider.setRange(1, 10, 1);
+    voicesSlider.setValue(processor.getNumVoices());
+    voicesSlider.addListener(this);
+
     smoothLabel.setText("Smoothness", dontSendNotification);
     makeLabelUpperCase(smoothLabel);
     addAndMakeVisible(smoothLabel);
@@ -93,6 +101,11 @@ void PathSynthAudioProcessorEditor::resized()
 {
     auto area = getBounds();
     area.reduce(10, 10);
+
+    auto voicesArea = area.removeFromTop(20);
+    voicesLabel.setBounds(voicesArea.removeFromLeft(voicesLabel.getFont().getStringWidth(voicesLabel.getText())));
+    voicesSlider.setBounds(voicesArea);
+
     auto adsrBounds = area.removeFromTop(area.proportionOfHeight(0.1f));
     auto adsrWidth = adsrBounds.getWidth() / 4.0f;
 
@@ -134,4 +147,12 @@ void PathSynthAudioProcessorEditor::timerCallback()
     const Path smoothPath = planeComponent.update();
     const auto direction = *parameters.getRawParameterValue("direction");
     waveDisplayComponent.update(smoothPath, direction);
+}
+
+void PathSynthAudioProcessorEditor::sliderValueChanged(Slider* slider)
+{
+    if (slider == &voicesSlider)
+    {
+        processor.setNumVoices(voicesSlider.getValue());
+    }
 }

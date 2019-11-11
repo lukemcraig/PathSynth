@@ -228,12 +228,7 @@ void PathSynthAudioProcessor::changeProgramName(int index, const String& newName
 //==============================================================================
 void PathSynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    resampler.reset();
-    oversampledBuffer.setSize(1, samplesPerBlock * oversampleFactor);
-    oversampledBuffer.clear();
-
     synthesiser.setCurrentPlaybackSampleRate(sampleRate); // todo * oversampleFactor
-    midiCollector.reset(sampleRate);
 }
 
 void PathSynthAudioProcessor::releaseResources()
@@ -285,10 +280,6 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     synthesiser.renderNextBlock(buffer, midiMessages,
                                 0, buffer.getNumSamples());
 
-    // downsample the oversampled data
-    /* const auto outputBuffer = buffer.getWritePointer(0);
-      resampler.process(oversampleFactor, channelData, outputBuffer, buffer.getNumSamples());*/
-
     // copy the processed channel to all the other channels
     for (auto i = 1; i < totalNumOutputChannels; ++i)
         buffer.copyFrom(i, 0, buffer, 0, 0, buffer.getNumSamples());
@@ -321,6 +312,37 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
     if (xmlState != nullptr)
         if (xmlState->hasTagName(parameters.state.getType()))
             parameters.replaceState(ValueTree::fromXml(*xmlState));
+}
+
+void PathSynthAudioProcessor::setNumVoices(int newNumVoices)
+{
+    numVoices = newNumVoices;
+    const auto synthNumVoices = synthesiser.getNumVoices();
+    if (synthNumVoices == numVoices)
+    {
+        return;
+    }
+    if (synthNumVoices < numVoices)
+    {
+        for (auto i = synthNumVoices; i < numVoices; ++i)
+        {
+            synthesiser.addVoice(new PathVoice(parameters, processorPath, envParams));
+        }
+        jassert(numVoices==synthesiser.getNumVoices());
+        return;
+    }
+    // synthNumVoices > numVoices
+    for (auto i = synthNumVoices; i > numVoices; --i)
+    {
+        synthesiser.removeVoice(i - 1);
+    }
+    jassert(numVoices==synthesiser.getNumVoices());
+}
+
+int PathSynthAudioProcessor::getNumVoices()
+{
+    jassert(numVoices==synthesiser.getNumVoices());
+    return numVoices;
 }
 
 //==============================================================================

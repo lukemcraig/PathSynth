@@ -45,10 +45,11 @@ private:
     // todo parameterize
     float frequencyOfA = 440.0f;
 
-    int currentNoteNumber;
-    float pitchBend;
+    int currentNoteNumber{};
+    float pitchBend{};
     float phaseIncrement{};
     float t{};
+
     float level{};
 
     ADSR::Parameters& envParams;
