@@ -303,6 +303,7 @@ void PathSynthAudioProcessor::getStateInformation(MemoryBlock& destData)
 {
     const auto state = parameters.copyState();
     const auto xml(state.createXml());
+    xml->setAttribute("maxVoices", numVoices);
     copyXmlToBinary(*xml, destData);
 }
 
@@ -310,8 +311,17 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
 {
     const auto xmlState(getXmlFromBinary(data, sizeInBytes));
     if (xmlState != nullptr)
+    {
+        if (xmlState->hasAttribute("maxVoices"))
+        {
+            setNumVoices(xmlState->getIntAttribute("maxVoices", 10));
+            xmlState->removeAttribute("maxVoices");
+        }
         if (xmlState->hasTagName(parameters.state.getType()))
+        {
             parameters.replaceState(ValueTree::fromXml(*xmlState));
+        }
+    }
 }
 
 void PathSynthAudioProcessor::setNumVoices(int newNumVoices)
