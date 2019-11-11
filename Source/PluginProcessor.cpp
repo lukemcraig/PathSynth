@@ -45,6 +45,100 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                                                         false),
                                                                y));
     }
+    params.push_back(std::make_unique<AudioParameterFloat>("attack",
+                                                           "Attack",
+                                                           NormalisableRange<float>(0.0f,
+                                                                                    20000.0f,
+                                                                                    0.0f,
+                                                                                    0.2f,
+                                                                                    false),
+                                                           1.0f,
+                                                           String(),
+                                                           AudioProcessorParameter::genericParameter,
+                                                           [](const float value, int /*maximumStringLength*/)
+                                                           {
+                                                               if (value >= 1000.0f)
+                                                                   return String(value / 1000.0f, 2) + " s";
+                                                               return String(value, 2) + " ms";
+                                                           },
+                                                           [](const String& text)
+                                                           {
+                                                               if (text.endsWith(" s") ||
+                                                                   (text.endsWith("s") && !text.endsWith("ms")))
+                                                               {
+                                                                   return text.getFloatValue() * 1000.0f;
+                                                               }
+                                                               return text.getFloatValue();
+                                                           }));
+    params.push_back(std::make_unique<AudioParameterFloat>("decay",
+                                                           "Decay",
+                                                           NormalisableRange<float>(1.0f,
+                                                                                    60000.0f,
+                                                                                    0.0f,
+                                                                                    0.2f,
+                                                                                    false),
+                                                           600.0f,
+                                                           String(),
+                                                           AudioProcessorParameter::genericParameter,
+                                                           [](const float value, int /*maximumStringLength*/)
+                                                           {
+                                                               if (value >= 1000.0f)
+                                                                   return String(value / 1000.0f, 2) + " s";
+                                                               return String(value, 2) + " ms";
+                                                           },
+                                                           [](const String& text)
+                                                           {
+                                                               if (text.endsWith(" s") ||
+                                                                   (text.endsWith("s") && !text.endsWith("ms")))
+                                                               {
+                                                                   return text.getFloatValue() * 1000.0f;
+                                                               }
+                                                               return text.getFloatValue();
+                                                           }));
+    params.push_back(std::make_unique<AudioParameterFloat>("sustain",
+                                                           "Sustain",
+                                                           NormalisableRange<float>(0.0f,
+                                                                                    1.0,
+                                                                                    0.0f,
+                                                                                    1.0f,
+                                                                                    false),
+                                                           1.0f,
+                                                           String(),
+                                                           AudioProcessorParameter::genericParameter,
+                                                           [](const float value, int /*maximumStringLength*/)
+                                                           {
+                                                               return String(Decibels::gainToDecibels(value), 2) +
+                                                                   " dB";
+                                                           },
+                                                           [](const String& text)
+                                                           {
+                                                               return Decibels::decibelsToGain(text.getFloatValue());
+                                                           }));
+    params.push_back(std::make_unique<AudioParameterFloat>("release",
+                                                           "Release",
+                                                           NormalisableRange<float>(1.0f,
+                                                                                    60000.0f,
+                                                                                    0.0f,
+                                                                                    0.2f,
+                                                                                    false),
+                                                           50.0f,
+                                                           String(),
+                                                           AudioProcessorParameter::genericParameter,
+                                                           [](const float value, int /*maximumStringLength*/)
+                                                           {
+                                                               if (value >= 1000.0f)
+                                                                   return String(value / 1000.0f, 2) + " s";
+                                                               return String(value, 2) + " ms";
+                                                           },
+                                                           [](const String& text)
+                                                           {
+                                                               if (text.endsWith(" s") ||
+                                                                   (text.endsWith("s") && !text.endsWith("ms")))
+                                                               {
+                                                                   return text.getFloatValue() * 1000.0f;
+                                                               }
+                                                               return text.getFloatValue();
+                                                           }));
     return {params.begin(), params.end()};
 }
 
@@ -60,7 +154,7 @@ PathSynthAudioProcessor::PathSynthAudioProcessor(): AudioProcessor(
 {
     for (auto i = 0; i < numVoices; ++i)
     {
-        synthesiser.addVoice(new PathVoice(parameters, processorPath));
+        synthesiser.addVoice(new PathVoice(parameters, processorPath, envParams));
     }
     synthesiser.addSound(new PathSound());
 }
@@ -181,8 +275,11 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
     setPath();
 
-  /*  MidiBuffer incomingMidi;*/
-   // midiCollector.removeNextBlockOfMessages(midiMessages, buffer.getNumSamples());
+    envParams.attack = *parameters.getRawParameterValue("attack") / 1000.0f;
+    envParams.decay = *parameters.getRawParameterValue("decay") / 1000.0f;
+    envParams.sustain = *parameters.getRawParameterValue("sustain");
+    envParams.release = *parameters.getRawParameterValue("release") / 1000.0f;
+
     keyboardState.processNextMidiBuffer(midiMessages, 0,
                                         buffer.getNumSamples(), true);
     synthesiser.renderNextBlock(buffer, midiMessages,
@@ -195,6 +292,8 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     // copy the processed channel to all the other channels
     for (auto i = 1; i < totalNumOutputChannels; ++i)
         buffer.copyFrom(i, 0, buffer, 0, 0, buffer.getNumSamples());
+
+    midiMessages.clear();
 }
 
 //==============================================================================

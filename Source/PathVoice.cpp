@@ -11,8 +11,11 @@
 #include "PathVoice.h"
 #include "PathSound.h"
 
-PathVoice::PathVoice(AudioProcessorValueTreeState& apvts, Path& pp) : parameters(apvts), processorPath(pp)
+PathVoice::PathVoice(AudioProcessorValueTreeState& apvts, Path& pp, ADSR::Parameters& envParams) : parameters(apvts),
+                                                                                                   processorPath(pp),
+                                                                                                   envParams(envParams)
 {
+    envelope.setParameters(envParams);
 }
 
 bool PathVoice::canPlaySound(SynthesiserSound* sound)
@@ -22,23 +25,23 @@ bool PathVoice::canPlaySound(SynthesiserSound* sound)
 
 void PathVoice::startNote(int midiNoteNumber, float velocity, SynthesiserSound* sound, int currentPitchWheelPosition)
 {
-    auto frequency = MidiMessage::getMidiNoteInHertz(midiNoteNumber);
+    const auto frequency = MidiMessage::getMidiNoteInHertz(midiNoteNumber);
     phaseIncrement = frequency / getSampleRate(); //todo * oversampleFactor
-    level = velocity * 0.15f;
-    tailOff = 0.0f;
+    level = velocity;
+    envelope.noteOn();
 }
 
 void PathVoice::stopNote(float velocity, bool allowTailOff)
 {
     if (allowTailOff)
     {
-        if (tailOff == 0.0f)
-            tailOff = 1.0f;
+        envelope.noteOff();
     }
     else
     {
         clearCurrentNote();
         phaseIncrement = 0.0f;
+        envelope.reset();
     }
 }
 
@@ -73,38 +76,40 @@ void PathVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int startSampl
 {
     if (phaseIncrement != 0.0f)
     {
+        envelope.setParameters(envParams);
+
+        // todo don't need to do this for every voice
         const auto length = processorPath.getLength();
 
         const auto direction = *parameters.getRawParameterValue("direction");
 
         auto* channelData = outputBuffer.getWritePointer(0);
-        if (tailOff > 0.0f)
+
+        for (auto sample = startSample; sample < startSample + numSamples; ++sample)
         {
-            for (auto sample = startSample; sample < numSamples; ++sample)
+            if (envelope.isActive())
             {
-                const auto value = getNextSample(length, direction);
-
-                channelData[sample] += value * level * tailOff;
-
-                tailOff *= 0.5f;
-
-                if (tailOff <= 0.005f)
+                const auto envValue = envelope.getNextSample();
+                if (envValue != 0.0f)
                 {
-                    clearCurrentNote();
-
-                    phaseIncrement = 0.0f;
-                    break;
+                    const auto value = getNextSample(length, direction);
+                    channelData[sample] += value * level * envValue;
                 }
             }
-        }
-        else
-        {
-            for (auto sample = startSample; sample < numSamples; ++sample)
+            else
             {
-                const auto value = getNextSample(length, direction);
-
-                channelData[sample] += value * level;
+                clearCurrentNote();
+                phaseIncrement = 0.0f;
+                envelope.reset();
+                break;
             }
         }
     }
+}
+
+void PathVoice::setCurrentPlaybackSampleRate(double newRate)
+{
+    SynthesiserVoice::setCurrentPlaybackSampleRate(newRate);
+    if (newRate != 0)
+        envelope.setSampleRate(newRate);
 }

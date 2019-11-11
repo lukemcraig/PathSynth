@@ -14,7 +14,7 @@
 class PathVoice : public SynthesiserVoice
 {
 public:
-    PathVoice(AudioProcessorValueTreeState&, Path&);
+    PathVoice(AudioProcessorValueTreeState&, Path&, ADSR::Parameters&);
 
     ~PathVoice() = default;
 
@@ -32,6 +32,8 @@ public:
 
     void renderNextBlock(AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override;
 
+    void setCurrentPlaybackSampleRate(double newRate) override;
+
 private:
     AudioProcessorValueTreeState& parameters;
     Path& processorPath;
@@ -39,7 +41,9 @@ private:
     float phaseIncrement{};
     float t{};
     float level{};
-    float tailOff{};
+
+    ADSR::Parameters& envParams;
+    ADSR envelope;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathVoice)
 };

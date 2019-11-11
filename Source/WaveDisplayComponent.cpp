@@ -73,4 +73,6 @@ void WaveDisplayComponent::update(Path smoothPath, const int direction)
         else
             signalPath.lineTo(i, pointValue);
     }
+    //todo more effecient repaint
+    repaint();
 }
