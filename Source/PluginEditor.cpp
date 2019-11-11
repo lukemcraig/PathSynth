@@ -38,7 +38,11 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     auto& lookAndFeel = getLookAndFeel();
     lookAndFeel.setColour(ResizableWindow::backgroundColourId, Colour(0xffe4753d));
     lookAndFeel.setColour(Label::textColourId, Colours::black);
-    lookAndFeel.setColour(Slider::backgroundColourId, Colours::red);
+    lookAndFeel.setColour(Slider::trackColourId, Colour(0xffa84350));
+    lookAndFeel.setColour(Slider::backgroundColourId, Colour(0xffdac9cb));
+    lookAndFeel.setColour(ComboBox::backgroundColourId, Colour(0xffdcc296));
+    lookAndFeel.setColour(ComboBox::textColourId, Colours::black);
+    lookAndFeel.setColour(MidiKeyboardComponent::ColourIds::keyDownOverlayColourId, Colour(0xff97b0c4));
 
     setResizable(true, true);
     setResizeLimits(32, 32, 2048, 2048);

@@ -27,7 +27,7 @@ void PathVoice::startNote(int midiNoteNumber, float velocity, SynthesiserSound* 
 {
     const auto frequency = MidiMessage::getMidiNoteInHertz(midiNoteNumber);
     phaseIncrement = frequency / getSampleRate(); //todo * oversampleFactor
-    level = velocity * 0.15f;
+    level = velocity;
     envelope.noteOn();
 }
 
