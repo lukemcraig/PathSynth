@@ -57,24 +57,21 @@ public:
     void setStateInformation(const void* data, int sizeInBytes) override;
 
     //==============================================================================
+    void setNumVoices(int newNumVoices);
 
+    int getNumVoices();
+
+    //==============================================================================
 private:
     AudioProcessorValueTreeState parameters;
     MidiKeyboardState keyboardState;
-    MidiMessageCollector midiCollector;
+
+    Path straightPath{};
     Path processorPath{};
+
     int numVoices{10};
     ADSR::Parameters envParams;
     Synthesiser synthesiser;
-
-    float t{};
-
-    Path straightPath{};
-
-    // TODO different resampling method
-    LagrangeInterpolator resampler;
-    AudioBuffer<float> oversampledBuffer;
-    const int oversampleFactor{2};
 
     //==============================================================================
     void setPath();
