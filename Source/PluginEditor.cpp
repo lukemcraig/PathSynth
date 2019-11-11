@@ -16,7 +16,7 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
 
     addAndMakeVisible(keyboardComponent);
 
-    voicesLabel.setText("Voices #", dontSendNotification);
+    voicesLabel.setText("Max Voices", dontSendNotification);
     makeLabelUpperCase(voicesLabel);
     addAndMakeVisible(voicesLabel);
     addAndMakeVisible(voicesSlider);
