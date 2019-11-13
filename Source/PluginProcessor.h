@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "hiir/Downsampler2xFpu.h"
 
 //==============================================================================
 /**
@@ -69,12 +70,20 @@ private:
     Path straightPath{};
     Path processorPath{};
 
+    static constexpr int numCoeffs{6};
+
+    hiir::Downsampler2xFpu<numCoeffs> downsampler;
+    int oversampleFactor{2};
+    AudioBuffer<float> oversampledBuffer;
+
     int numVoices{10};
     ADSR::Parameters envParams;
     Synthesiser synthesiser;
 
     //==============================================================================
     void setPath();
+
+    void updateEnvParams();
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathSynthAudioProcessor)

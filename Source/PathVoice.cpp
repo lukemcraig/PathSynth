@@ -62,7 +62,7 @@ void PathVoice::updatePitchBend(int newPitchWheelValue)
 void PathVoice::updatePhaseIncrement()
 {
     const auto frequency = frequencyOfA * std::pow(2.0f, (currentNoteNumber + pitchBend - 69.0f) / 12.0f);
-    phaseIncrement = frequency / getSampleRate(); //todo * oversampleFactor
+    phaseIncrement = frequency / getSampleRate();
 }
 
 void PathVoice::pitchWheelMoved(int newPitchWheelValue)
@@ -78,11 +78,14 @@ void PathVoice::controllerMoved(int controllerNumber, int newControllerValue)
 float PathVoice::getNextSample(const float length, const float direction)
 {
     const auto point = processorPath.getPointAlongPath(length * t);
+
     float value;
     if (direction == 0)
         value = point.getX();
     else
         value = point.getY();
+
+    jassert(!std::isnan(value));
 
     t += phaseIncrement;
 
