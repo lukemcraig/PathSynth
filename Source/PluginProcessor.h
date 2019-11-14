@@ -73,7 +73,8 @@ private:
     static constexpr int numCoeffs{6};
 
     hiir::Downsampler2xFpu<numCoeffs> downsampler;
-    int oversampleFactor{2};
+    hiir::Downsampler2xFpu<numCoeffs> downsampler2;
+    int oversampleFactor{4};
     AudioBuffer<float> oversampledBuffer;
 
     int numVoices{10};

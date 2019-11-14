@@ -238,6 +238,11 @@ void PathSynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlo
     hiir::PolyphaseIir2Designer::compute_coefs(coefs, 100.0, 0.1);
     downsampler.set_coefs(coefs);
     downsampler.clear_buffers();
+
+
+    hiir::PolyphaseIir2Designer::compute_coefs(coefs, 100.0, 0.1);
+    downsampler2.set_coefs(coefs);
+    downsampler2.clear_buffers();
 }
 
 void PathSynthAudioProcessor::releaseResources()
@@ -304,11 +309,14 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     //buffer.copyFrom(0, 0, oversampledBuffer, 0, 0, buffer.getNumSamples());
 
     auto bufferWrite = buffer.getWritePointer(0);
-    auto channelRead = oversampledBuffer.getReadPointer(0);
+    auto channelRead = oversampledBuffer.getWritePointer(0);
 
-    downsampler.process_block(bufferWrite,
+    downsampler.process_block(channelRead,
                               channelRead,
-                              buffer.getNumSamples());
+                              buffer.getNumSamples()*2);
+    downsampler2.process_block(bufferWrite,
+                               channelRead,
+                               buffer.getNumSamples());
     //buffer.applyGain(0, 0, buffer.getNumSamples(), Decibels::decibelsToGain(6.0 * (oversampleFactor - 1)));
 
     // copy the processed channel to all the other channels
