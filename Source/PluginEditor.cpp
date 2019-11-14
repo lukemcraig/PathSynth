@@ -16,6 +16,16 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
 
     addAndMakeVisible(keyboardComponent);
 
+    oversamplingLabel.setText("Oversampling", dontSendNotification);
+    makeLabelUpperCase(oversamplingLabel);
+    addAndMakeVisible(oversamplingLabel);
+    addAndMakeVisible(oversamplingBox);
+    oversamplingBox.addItem("1x", 1);
+    oversamplingBox.addItem("2x", 2);
+    oversamplingBox.addItem("4x", 4);
+    oversamplingBox.setSelectedId(processor.getOversampleFactor());
+    oversamplingBox.addListener(this);
+
     voicesLabel.setText("Max Voices", dontSendNotification);
     makeLabelUpperCase(voicesLabel);
     addAndMakeVisible(voicesLabel);
@@ -102,6 +112,11 @@ void PathSynthAudioProcessorEditor::resized()
     auto area = getBounds();
     area.reduce(10, 10);
 
+    auto oversamplingArea = area.removeFromTop(20);
+    oversamplingLabel.setBounds(
+        oversamplingArea.removeFromLeft(oversamplingLabel.getFont().getStringWidth(oversamplingLabel.getText())));
+    oversamplingBox.setBounds(oversamplingArea);
+
     auto voicesArea = area.removeFromTop(20);
     voicesLabel.setBounds(voicesArea.removeFromLeft(voicesLabel.getFont().getStringWidth(voicesLabel.getText())));
     voicesSlider.setBounds(voicesArea);
@@ -154,5 +169,13 @@ void PathSynthAudioProcessorEditor::sliderValueChanged(Slider* slider)
     if (slider == &voicesSlider)
     {
         processor.setNumVoices(voicesSlider.getValue());
+    }
+}
+
+void PathSynthAudioProcessorEditor::comboBoxChanged(ComboBox* comboBoxThatHasChanged)
+{
+    if (comboBoxThatHasChanged == &oversamplingBox)
+    {
+        processor.setOversampleFactor(oversamplingBox.getSelectedId());
     }
 }

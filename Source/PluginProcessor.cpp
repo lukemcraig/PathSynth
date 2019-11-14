@@ -231,14 +231,13 @@ void PathSynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlo
 {
     synthesiser.setCurrentPlaybackSampleRate(sampleRate * oversampleFactor);
 
-    oversampledBuffer.setSize(1, samplesPerBlock * oversampleFactor);
+    oversampledBuffer.setSize(1, samplesPerBlock * maxOversampleFactor);
     oversampledBuffer.clear();
 
     double coefs[numCoeffs]{};
     hiir::PolyphaseIir2Designer::compute_coefs(coefs, 100.0, 0.1);
     downsampler.set_coefs(coefs);
     downsampler.clear_buffers();
-
 
     hiir::PolyphaseIir2Designer::compute_coefs(coefs, 100.0, 0.1);
     downsampler2.set_coefs(coefs);
@@ -287,8 +286,6 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 {
     ScopedNoDenormals noDenormals;
 
-    jassert(buffer.getNumSamples() * oversampleFactor == oversampledBuffer.getNumSamples());
-
     setPath();
 
     updateEnvParams();
@@ -306,17 +303,25 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
                                 0,
                                 buffer.getNumSamples() * oversampleFactor);
 
-    //buffer.copyFrom(0, 0, oversampledBuffer, 0, 0, buffer.getNumSamples());
-
     auto bufferWrite = buffer.getWritePointer(0);
     auto channelRead = oversampledBuffer.getWritePointer(0);
 
-    downsampler.process_block(channelRead,
-                              channelRead,
-                              buffer.getNumSamples()*2);
-    downsampler2.process_block(bufferWrite,
-                               channelRead,
-                               buffer.getNumSamples());
+    if (oversampleFactor == 4)
+    {
+        downsampler2.process_block(channelRead,
+                                   channelRead,
+                                   buffer.getNumSamples() * 2);
+    }
+    if (oversampleFactor >= 2)
+    {
+        downsampler.process_block(bufferWrite,
+                                  channelRead,
+                                  buffer.getNumSamples());
+    }
+    else
+    {
+        buffer.copyFrom(0, 0, oversampledBuffer, 0, 0, buffer.getNumSamples());
+    }
     //buffer.applyGain(0, 0, buffer.getNumSamples(), Decibels::decibelsToGain(6.0 * (oversampleFactor - 1)));
 
     // copy the processed channel to all the other channels
@@ -343,6 +348,7 @@ void PathSynthAudioProcessor::getStateInformation(MemoryBlock& destData)
     const auto state = parameters.copyState();
     const auto xml(state.createXml());
     xml->setAttribute("maxVoices", numVoices);
+    xml->setAttribute("oversampleFactor", oversampleFactor);
     copyXmlToBinary(*xml, destData);
 }
 
@@ -355,6 +361,11 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
         {
             setNumVoices(xmlState->getIntAttribute("maxVoices", 10));
             xmlState->removeAttribute("maxVoices");
+        }
+        if (xmlState->hasAttribute("oversampleFactor"))
+        {
+            setOversampleFactor(xmlState->getIntAttribute("oversampleFactor", 4));
+            xmlState->removeAttribute("oversampleFactor");
         }
         if (xmlState->hasTagName(parameters.state.getType()))
         {
@@ -392,6 +403,12 @@ int PathSynthAudioProcessor::getNumVoices()
 {
     jassert(numVoices==synthesiser.getNumVoices());
     return numVoices;
+}
+
+void PathSynthAudioProcessor::setOversampleFactor(int newOversampleFactor)
+{
+    oversampleFactor = newOversampleFactor;
+    synthesiser.setCurrentPlaybackSampleRate(getSampleRate() * oversampleFactor);
 }
 
 //==============================================================================

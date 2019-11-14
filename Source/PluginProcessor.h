@@ -62,6 +62,10 @@ public:
 
     int getNumVoices();
 
+    void setOversampleFactor(int newOversampleFactor);
+
+    int getOversampleFactor() const { return oversampleFactor; }
+
     //==============================================================================
 private:
     AudioProcessorValueTreeState parameters;
@@ -74,6 +78,7 @@ private:
 
     hiir::Downsampler2xFpu<numCoeffs> downsampler;
     hiir::Downsampler2xFpu<numCoeffs> downsampler2;
+    static constexpr int maxOversampleFactor{4};
     int oversampleFactor{4};
     AudioBuffer<float> oversampledBuffer;
 
