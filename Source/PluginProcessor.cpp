@@ -334,7 +334,6 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     {
         buffer.copyFrom(0, 0, oversampledBuffer, 0, 0, buffer.getNumSamples());
     }
-    //buffer.applyGain(0, 0, buffer.getNumSamples(), Decibels::decibelsToGain(6.0 * (oversampleFactor - 1)));
 
     // copy the processed channel to all the other channels
     for (auto i = 1; i < getTotalNumOutputChannels(); ++i)

@@ -90,7 +90,7 @@ float PathVoice::getNextSample(const float length, const float direction)
     // if the path has duplicate points it sometimes returns nans
     if (std::isnan(value))
     {
-        DBG("nan");
+        //DBG("nan");
         value = prevValue;
     }
     prevValue = value;
