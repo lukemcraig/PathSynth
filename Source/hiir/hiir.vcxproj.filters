@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="def.h" />
+    <ClInclude Include="Downsampler2x3dnow.h" />
+    <ClInclude Include="Downsampler2x3dnow.hpp" />
+    <ClInclude Include="Downsampler2xFpu.h" />
+    <ClInclude Include="Downsampler2xFpu.hpp" />
+    <ClInclude Include="Downsampler2xSse.h" />
+    <ClInclude Include="Downsampler2xSse.hpp" />
+    <ClInclude Include="fnc.h" />
+    <ClInclude Include="fnc.hpp" />
+    <ClInclude Include="PhaseHalfPi3dnow.h" />
+    <ClInclude Include="PhaseHalfPi3dnow.hpp" />
+    <ClInclude Include="PhaseHalfPiFpu.h" />
+    <ClInclude Include="PhaseHalfPiFpu.hpp" />
+    <ClInclude Include="PhaseHalfPiSse.h" />
+    <ClInclude Include="PhaseHalfPiSse.hpp" />
+    <ClInclude Include="PolyphaseIir2Designer.h" />
+    <ClInclude Include="StageData3dnow.h" />
+    <ClInclude Include="StageDataSse.h" />
+    <ClInclude Include="StageProc3dnow.h" />
+    <ClInclude Include="StageProc3dnow.hpp" />
+    <ClInclude Include="StageProcFpu.h" />
+    <ClInclude Include="StageProcFpu.hpp" />
+    <ClInclude Include="StageProcSse.h" />
+    <ClInclude Include="StageProcSse.hpp" />
+    <ClInclude Include="Upsampler2x3dnow.h" />
+    <ClInclude Include="Upsampler2x3dnow.hpp" />
+    <ClInclude Include="Upsampler2xFpu.h" />
+    <ClInclude Include="Upsampler2xFpu.hpp" />
+    <ClInclude Include="Upsampler2xSse.h" />
+    <ClInclude Include="Upsampler2xSse.hpp" />
+    <ClInclude Include="test\TestUpsampler2x.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\AlignedObject.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\AlignedObject.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\BlockSplitter.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\conf.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\FileOp.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\ResultCheck.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\SpeedTester.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\SpeedTester.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\SpeedTesterBase.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\SweepingSine.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestAllClassesFnc.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestAllClassesFnc.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestAllClassesSpeed.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestAllClassesSpeed.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestDownsampler2x.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestDownsampler2x.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestPhaseHalfPi.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestPhaseHalfPi.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestUpsampler2x.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="Downsampler2x4Sse.h" />
+    <ClInclude Include="Downsampler2x4Sse.hpp" />
+    <ClInclude Include="StageProc4Sse.h" />
+    <ClInclude Include="StageProc4Sse.hpp" />
+    <ClInclude Include="Upsampler2x4Sse.h" />
+    <ClInclude Include="Upsampler2x4Sse.hpp" />
+    <ClInclude Include="Downsampler2x4Neon.h" />
+    <ClInclude Include="Downsampler2x4Neon.hpp" />
+    <ClInclude Include="Downsampler2xNeon.h" />
+    <ClInclude Include="Downsampler2xNeon.hpp" />
+    <ClInclude Include="PhaseHalfPiNeon.h" />
+    <ClInclude Include="PhaseHalfPiNeon.hpp" />
+    <ClInclude Include="StageDataNeon.h" />
+    <ClInclude Include="StageProc4Neon.h" />
+    <ClInclude Include="StageProc4Neon.hpp" />
+    <ClInclude Include="StageProcNeon.h" />
+    <ClInclude Include="StageProcNeon.hpp" />
+    <ClInclude Include="Upsampler2x4Neon.h" />
+    <ClInclude Include="Upsampler2x4Neon.hpp" />
+    <ClInclude Include="Upsampler2xNeon.h" />
+    <ClInclude Include="Upsampler2xNeon.hpp" />
+    <ClInclude Include="test\TimerAccurate.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TimerAccurate.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestDownsampler2x4.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestDownsampler2x4.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestUpsampler2x4.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestUpsampler2x4.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="PolyphaseIir2Designer.cpp" />
+    <ClCompile Include="test\BlockSplitter.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\FileOp.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\main.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ResultCheck.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\SpeedTesterBase.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\SweepingSine.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\TimerAccurate.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="test">
+      <UniqueIdentifier>{0ccdd599-c002-4737-af39-66ac9329d8e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="doc">
+      <UniqueIdentifier>{566ba5a8-a4bd-44b5-8add-6bee8feda06a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\license.txt">
+      <Filter>doc</Filter>
+    </None>
+    <None Include="..\readme.txt">
+      <Filter>doc</Filter>
+    </None>
+  </ItemGroup>
+</Project>

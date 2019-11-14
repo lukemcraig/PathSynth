@@ -43,6 +43,8 @@ void PathVoice::stopNote(float velocity, bool allowTailOff)
     {
         clearCurrentNote();
         phaseIncrement = 0.0f;
+        prevValue = 0.0f;
+        t = 0.0f;
         envelope.reset();
     }
 }
@@ -62,7 +64,7 @@ void PathVoice::updatePitchBend(int newPitchWheelValue)
 void PathVoice::updatePhaseIncrement()
 {
     const auto frequency = frequencyOfA * std::pow(2.0f, (currentNoteNumber + pitchBend - 69.0f) / 12.0f);
-    phaseIncrement = frequency / getSampleRate(); //todo * oversampleFactor
+    phaseIncrement = frequency / getSampleRate();
 }
 
 void PathVoice::pitchWheelMoved(int newPitchWheelValue)
@@ -78,11 +80,20 @@ void PathVoice::controllerMoved(int controllerNumber, int newControllerValue)
 float PathVoice::getNextSample(const float length, const float direction)
 {
     const auto point = processorPath.getPointAlongPath(length * t);
+
     float value;
     if (direction == 0)
         value = point.getX();
     else
         value = point.getY();
+
+    // if the path has duplicate points it sometimes returns nans
+    if (std::isnan(value))
+    {
+        //DBG("nan");
+        value = prevValue;
+    }
+    prevValue = value;
 
     t += phaseIncrement;
 
@@ -122,6 +133,8 @@ void PathVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int startSampl
             {
                 clearCurrentNote();
                 phaseIncrement = 0.0f;
+                prevValue = 0.0f;
+                t = 0.0f;
                 envelope.reset();
                 break;
             }

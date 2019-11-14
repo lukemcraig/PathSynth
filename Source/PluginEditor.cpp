@@ -16,6 +16,17 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
 
     addAndMakeVisible(keyboardComponent);
 
+    oversamplingLabel.setText("Oversampling", dontSendNotification);
+    makeLabelUpperCase(oversamplingLabel);
+    addAndMakeVisible(oversamplingLabel);
+    addAndMakeVisible(oversamplingBox);
+    oversamplingBox.addItem("1x", 1);
+    oversamplingBox.addItem("2x", 2);
+    oversamplingBox.addItem("4x", 4);
+    oversamplingBox.addItem("8x", 8);
+    oversamplingBox.setSelectedId(processor.getOversampleFactor());
+    oversamplingBox.addListener(this);
+
     voicesLabel.setText("Max Voices", dontSendNotification);
     makeLabelUpperCase(voicesLabel);
     addAndMakeVisible(voicesLabel);
@@ -102,9 +113,15 @@ void PathSynthAudioProcessorEditor::resized()
     auto area = getBounds();
     area.reduce(10, 10);
 
-    auto voicesArea = area.removeFromTop(20);
-    voicesLabel.setBounds(voicesArea.removeFromLeft(voicesLabel.getFont().getStringWidth(voicesLabel.getText())));
-    voicesSlider.setBounds(voicesArea);
+    auto voicesOversamplingArea = area.removeFromTop(20);
+
+    voicesLabel.setBounds(
+        voicesOversamplingArea.removeFromLeft(voicesLabel.getFont().getStringWidth(voicesLabel.getText())));
+    voicesSlider.setBounds(voicesOversamplingArea.removeFromLeft(voicesOversamplingArea.proportionOfWidth(0.5f)));
+
+    oversamplingLabel.setBounds(
+        voicesOversamplingArea.removeFromLeft(oversamplingLabel.getFont().getStringWidth(oversamplingLabel.getText())));
+    oversamplingBox.setBounds(voicesOversamplingArea);
 
     auto adsrBounds = area.removeFromTop(area.proportionOfHeight(0.1f));
     auto adsrWidth = adsrBounds.getWidth() / 4.0f;
@@ -154,5 +171,13 @@ void PathSynthAudioProcessorEditor::sliderValueChanged(Slider* slider)
     if (slider == &voicesSlider)
     {
         processor.setNumVoices(voicesSlider.getValue());
+    }
+}
+
+void PathSynthAudioProcessorEditor::comboBoxChanged(ComboBox* comboBoxThatHasChanged)
+{
+    if (comboBoxThatHasChanged == &oversamplingBox)
+    {
+        processor.setOversampleFactor(oversamplingBox.getSelectedId());
     }
 }

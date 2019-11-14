@@ -55,5 +55,7 @@ private:
     ADSR::Parameters& envParams;
     ADSR envelope;
 
+    float prevValue{};
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathVoice)
 };

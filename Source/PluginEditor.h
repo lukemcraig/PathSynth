@@ -10,7 +10,8 @@
 */
 class PathSynthAudioProcessorEditor : public AudioProcessorEditor,
                                       public Timer,
-                                      public Slider::Listener
+                                      public Slider::Listener,
+                                      public ComboBox::Listener
 {
 public:
 
@@ -35,6 +36,8 @@ public:
 
     void sliderValueChanged(Slider* slider) override;
 
+    void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
+
 private:
     typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
     typedef AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
@@ -50,6 +53,9 @@ private:
 
     Label voicesLabel;
     Slider voicesSlider;
+
+    Label oversamplingLabel;
+    ComboBox oversamplingBox;
 
     Label smoothLabel;
     Slider smoothSlider;

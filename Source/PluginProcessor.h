@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "hiir/Downsampler2xFpu.h"
 
 //==============================================================================
 /**
@@ -61,6 +62,10 @@ public:
 
     int getNumVoices();
 
+    void setOversampleFactor(int newOversampleFactor);
+
+    int getOversampleFactor() const { return oversampleFactor; }
+
     //==============================================================================
 private:
     AudioProcessorValueTreeState parameters;
@@ -69,12 +74,24 @@ private:
     Path straightPath{};
     Path processorPath{};
 
-    int numVoices{10};
+    static constexpr int numCoeffs{6};
+    hiir::Downsampler2xFpu<numCoeffs> downsampler;
+    static constexpr int numCoeffs2{6};
+    hiir::Downsampler2xFpu<numCoeffs> downsampler2;
+    static constexpr int numCoeffs3{6};
+    hiir::Downsampler2xFpu<numCoeffs> downsampler3;
+    static constexpr int maxOversampleFactor{8};
+    int oversampleFactor{2};
+    AudioBuffer<float> oversampledBuffer;
+
+    int numVoices{4};
     ADSR::Parameters envParams;
     Synthesiser synthesiser;
 
     //==============================================================================
     void setPath();
+
+    void updateEnvParams();
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathSynthAudioProcessor)
