@@ -23,6 +23,7 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     oversamplingBox.addItem("1x", 1);
     oversamplingBox.addItem("2x", 2);
     oversamplingBox.addItem("4x", 4);
+    oversamplingBox.addItem("8x", 8);
     oversamplingBox.setSelectedId(processor.getOversampleFactor());
     oversamplingBox.addListener(this);
 

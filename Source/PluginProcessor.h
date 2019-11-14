@@ -75,10 +75,12 @@ private:
     Path processorPath{};
 
     static constexpr int numCoeffs{6};
-
     hiir::Downsampler2xFpu<numCoeffs> downsampler;
+    static constexpr int numCoeffs2{6};
     hiir::Downsampler2xFpu<numCoeffs> downsampler2;
-    static constexpr int maxOversampleFactor{4};
+    static constexpr int numCoeffs3{6};
+    hiir::Downsampler2xFpu<numCoeffs> downsampler3;
+    static constexpr int maxOversampleFactor{8};
     int oversampleFactor{2};
     AudioBuffer<float> oversampledBuffer;
 
