@@ -81,5 +81,8 @@ private:
     Slider releaseSlider;
     std::unique_ptr<SliderAttachment> releaseAttachment;
 
+    Label nameLabel;
+    Path titlePath;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PathSynthAudioProcessorEditor)
 };

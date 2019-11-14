@@ -11,6 +11,16 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
       keyboardComponent(keyboardState, MidiKeyboardComponent::horizontalKeyboard),
       planeComponent(apvts)
 {
+    GlyphArrangement glyph;
+    glyph.addLineOfText(Font(32, Font::bold), "PATH SYNTH", 12, 38);
+    glyph.createPath(titlePath);
+
+    nameLabel.setFont(Font(16, Font::bold));
+    nameLabel.setText("Luke M. Craig", dontSendNotification);
+    nameLabel.setColour(Label::textColourId, Colour(0xffdcc296));
+    nameLabel.setJustificationType(Justification::bottomLeft);
+    addAndMakeVisible(nameLabel);
+
     addAndMakeVisible(planeComponent);
     addAndMakeVisible(waveDisplayComponent);
 
@@ -57,14 +67,23 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     auto& lookAndFeel = getLookAndFeel();
     lookAndFeel.setColour(ResizableWindow::backgroundColourId, Colour(0xffe4753d));
     lookAndFeel.setColour(Label::textColourId, Colours::black);
+
     lookAndFeel.setColour(Slider::trackColourId, Colour(0xffa84350));
     lookAndFeel.setColour(Slider::backgroundColourId, Colour(0xffdac9cb));
+    lookAndFeel.setColour(Slider::thumbColourId, Colour(0xff98acb9));
+    
+
     lookAndFeel.setColour(ComboBox::backgroundColourId, Colour(0xffdcc296));
     lookAndFeel.setColour(ComboBox::textColourId, Colours::black);
+
     lookAndFeel.setColour(MidiKeyboardComponent::ColourIds::keyDownOverlayColourId, Colour(0xff97b0c4));
+    lookAndFeel.setColour(MidiKeyboardComponent::ColourIds::whiteNoteColourId, Colour(0xffdcc296));
+    lookAndFeel.setColour(MidiKeyboardComponent::ColourIds::blackNoteColourId, Colour(0xff513a1d));
+    lookAndFeel.setColour(MidiKeyboardComponent::ColourIds::upDownButtonBackgroundColourId, Colour(0xffdcc296));
+    lookAndFeel.setColour(MidiKeyboardComponent::ColourIds::upDownButtonArrowColourId, Colour(0xff513a1d));
 
     setResizable(true, true);
-    setResizeLimits(32, 32, 2048, 2048);
+    setResizeLimits(256, 256, 2048, 2048);
     setSize(1024, 512);
 
     startTimer(100);
@@ -99,6 +118,12 @@ void PathSynthAudioProcessorEditor::paint(Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+
+    g.setColour(getLookAndFeel().findColour(MidiKeyboardComponent::ColourIds::keyDownOverlayColourId));
+    g.fillPath(titlePath);
+
+    g.setColour(getLookAndFeel().findColour(ComboBox::backgroundColourId));
+    g.strokePath(titlePath, PathStrokeType(1.0f));
 }
 
 void PathSynthAudioProcessorEditor::setLabelAreaAboveCentered(Label& label, Rectangle<int>& labelArea)
@@ -113,7 +138,13 @@ void PathSynthAudioProcessorEditor::resized()
     auto area = getBounds();
     area.reduce(10, 10);
 
-    auto voicesOversamplingArea = area.removeFromTop(20);
+    auto titleArea = area.removeFromTop(32);
+    titleArea.removeFromLeft(titlePath.getBounds().getWidth() + 10);
+    nameLabel.setBounds(titleArea.removeFromLeft(100));
+
+    titleArea.removeFromLeft(titleArea.proportionOfWidth(0.25f));
+
+    auto voicesOversamplingArea = titleArea;
 
     voicesLabel.setBounds(
         voicesOversamplingArea.removeFromLeft(voicesLabel.getFont().getStringWidth(voicesLabel.getText())));
