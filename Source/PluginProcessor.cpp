@@ -359,7 +359,7 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
     {
         if (xmlState->hasAttribute("maxVoices"))
         {
-            setNumVoices(xmlState->getIntAttribute("maxVoices", 10));
+            setNumVoices(xmlState->getIntAttribute("maxVoices", 4));
             xmlState->removeAttribute("maxVoices");
         }
         if (xmlState->hasAttribute("oversampleFactor"))

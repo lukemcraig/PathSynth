@@ -79,10 +79,10 @@ private:
     hiir::Downsampler2xFpu<numCoeffs> downsampler;
     hiir::Downsampler2xFpu<numCoeffs> downsampler2;
     static constexpr int maxOversampleFactor{4};
-    int oversampleFactor{4};
+    int oversampleFactor{2};
     AudioBuffer<float> oversampledBuffer;
 
-    int numVoices{10};
+    int numVoices{4};
     ADSR::Parameters envParams;
     Synthesiser synthesiser;
 

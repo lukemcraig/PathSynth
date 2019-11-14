@@ -112,14 +112,15 @@ void PathSynthAudioProcessorEditor::resized()
     auto area = getBounds();
     area.reduce(10, 10);
 
-    auto oversamplingArea = area.removeFromTop(20);
-    oversamplingLabel.setBounds(
-        oversamplingArea.removeFromLeft(oversamplingLabel.getFont().getStringWidth(oversamplingLabel.getText())));
-    oversamplingBox.setBounds(oversamplingArea);
+    auto voicesOversamplingArea = area.removeFromTop(20);
 
-    auto voicesArea = area.removeFromTop(20);
-    voicesLabel.setBounds(voicesArea.removeFromLeft(voicesLabel.getFont().getStringWidth(voicesLabel.getText())));
-    voicesSlider.setBounds(voicesArea);
+    voicesLabel.setBounds(
+        voicesOversamplingArea.removeFromLeft(voicesLabel.getFont().getStringWidth(voicesLabel.getText())));
+    voicesSlider.setBounds(voicesOversamplingArea.removeFromLeft(voicesOversamplingArea.proportionOfWidth(0.5f)));
+
+    oversamplingLabel.setBounds(
+        voicesOversamplingArea.removeFromLeft(oversamplingLabel.getFont().getStringWidth(oversamplingLabel.getText())));
+    oversamplingBox.setBounds(voicesOversamplingArea);
 
     auto adsrBounds = area.removeFromTop(area.proportionOfHeight(0.1f));
     auto adsrWidth = adsrBounds.getWidth() / 4.0f;
