@@ -288,7 +288,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
     updateEnvParams();
 
-    //buffer.clear(0, 0, buffer.getNumSamples());
+    buffer.clear(0, 0, buffer.getNumSamples());
 
     oversampledBuffer.clear(0, 0, oversampledBuffer.getNumSamples());
 
@@ -301,20 +301,18 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
                                 0,
                                 buffer.getNumSamples() * oversampleFactor);
 
+    //buffer.copyFrom(0, 0, oversampledBuffer, 0, 0, buffer.getNumSamples());
+
     auto bufferWrite = buffer.getWritePointer(0);
     auto channelRead = oversampledBuffer.getReadPointer(0);
-    //for (int i = 0; i < buffer.getNumSamples(); ++i)
-    //{
-    //    bufferWrite[i] = downsampler.process_sample(&channelRead[i * 2]);
-    //}
 
     downsampler.process_block(bufferWrite,
                               channelRead,
                               buffer.getNumSamples());
+    //buffer.applyGain(0, 0, buffer.getNumSamples(), Decibels::decibelsToGain(6.0 * (oversampleFactor - 1)));
 
     // copy the processed channel to all the other channels
-    const auto totalNumOutputChannels = getTotalNumOutputChannels();
-    for (auto i = 1; i < totalNumOutputChannels; ++i)
+    for (auto i = 1; i < getTotalNumOutputChannels(); ++i)
         buffer.copyFrom(i, 0, buffer, 0, 0, buffer.getNumSamples());
 
     midiMessages.clear();

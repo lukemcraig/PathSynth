@@ -43,6 +43,8 @@ void PathVoice::stopNote(float velocity, bool allowTailOff)
     {
         clearCurrentNote();
         phaseIncrement = 0.0f;
+        prevValue = 0.0f;
+        t = 0.0f;
         envelope.reset();
     }
 }
@@ -85,7 +87,13 @@ float PathVoice::getNextSample(const float length, const float direction)
     else
         value = point.getY();
 
-    jassert(!std::isnan(value));
+    // if the path has duplicate points it sometimes returns nans
+    if (std::isnan(value))
+    {
+        DBG("nan");
+        value = prevValue;
+    }
+    prevValue = value;
 
     t += phaseIncrement;
 
@@ -125,6 +133,8 @@ void PathVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int startSampl
             {
                 clearCurrentNote();
                 phaseIncrement = 0.0f;
+                prevValue = 0.0f;
+                t = 0.0f;
                 envelope.reset();
                 break;
             }
