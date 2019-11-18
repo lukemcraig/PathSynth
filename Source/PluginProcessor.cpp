@@ -344,7 +344,6 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     // filter dc offset
     for (int i = 0; i < buffer.getNumSamples(); ++i)
     {
-        //todo latency compensation
         bufferWrite[i] = dcBlocker.pushSample(bufferWrite[i]);
     }
 
@@ -459,11 +458,11 @@ void PathSynthAudioProcessor::setPath()
 
     processorPath = straightPath;
     const auto smoothPathBounds = processorPath.getBounds();
-    processorPath.applyTransform(
+    /*processorPath.applyTransform(
         AffineTransform::translation(
             -smoothPathBounds.getCentreX(),
             -smoothPathBounds.getCentreY()).followedBy(AffineTransform::scale(1.0f / smoothPathBounds.getWidth(),
-                                                                              1.0f / smoothPathBounds.getHeight())));
+                                                                              1.0f / smoothPathBounds.getHeight())));*/
 
     const auto smoothing = *parameters.getRawParameterValue("smoothing");
     processorPath = processorPath.createPathWithRoundedCorners(smoothing);
