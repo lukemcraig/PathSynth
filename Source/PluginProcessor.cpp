@@ -248,6 +248,8 @@ void PathSynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlo
     hiir::PolyphaseIir2Designer::compute_coefs(coefs3, 100.0, 0.1);
     downsampler3.set_coefs(coefs3);
     downsampler3.clear_buffers();
+
+    dcBlocker.reset();
 }
 
 void PathSynthAudioProcessor::releaseResources()

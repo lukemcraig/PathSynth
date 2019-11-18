@@ -21,6 +21,8 @@ public:
 
     float pushSample(float x);
 
+    void reset();
+
 private:
     float R;
     float previousInput{};

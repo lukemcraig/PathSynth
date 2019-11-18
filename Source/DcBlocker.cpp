@@ -26,3 +26,9 @@ float DcBlocker::pushSample(float x)
     previousOutput = y;
     return y;
 }
+
+void DcBlocker::reset()
+{
+    previousInput = 0.0f;
+    previousOutput = 0.0f;
+}
