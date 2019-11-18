@@ -310,29 +310,40 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
                                 buffer.getNumSamples() * oversampleFactor);
 
     auto bufferWrite = buffer.getWritePointer(0);
-    auto channelRead = oversampledBuffer.getWritePointer(0);
+    auto oversampleWrite = oversampledBuffer.getWritePointer(0);
 
     if (oversampleFactor >= 8)
     {
-        downsampler3.process_block(channelRead,
-                                   channelRead,
+        //8x to 4x
+        downsampler3.process_block(oversampleWrite,
+                                   oversampleWrite,
                                    buffer.getNumSamples() * 4);
     }
     if (oversampleFactor >= 4)
     {
-        downsampler2.process_block(channelRead,
-                                   channelRead,
+        //4x to 2x
+        downsampler2.process_block(oversampleWrite,
+                                   oversampleWrite,
                                    buffer.getNumSamples() * 2);
     }
     if (oversampleFactor >= 2)
     {
-        downsampler.process_block(bufferWrite,
-                                  channelRead,
+        //2x to 1x
+        downsampler.process_block(bufferWrite, // out
+                                  oversampleWrite, // in
                                   buffer.getNumSamples());
     }
     else
     {
+        //1x to 1x
         buffer.copyFrom(0, 0, oversampledBuffer, 0, 0, buffer.getNumSamples());
+    }
+
+    // filter dc offset
+    for (int i = 0; i < buffer.getNumSamples(); ++i)
+    {
+        //todo latency compensation
+        bufferWrite[i] = dcBlocker.pushSample(bufferWrite[i]);
     }
 
     // copy the processed channel to all the other channels
