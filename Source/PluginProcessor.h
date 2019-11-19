@@ -94,7 +94,7 @@ private:
     DcBlocker dcBlocker;
 
     //==============================================================================
-    void setPath();
+    void setPath(int numSamples);
 
     void updateEnvParams();
 

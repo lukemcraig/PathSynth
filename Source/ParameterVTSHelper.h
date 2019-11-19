@@ -36,6 +36,12 @@ public:
 
     float getPointY(int pointNum) { return smoothPointsY[pointNum].getNextValue(); }
 
+    //==============================================================================
+
+    float getPointXSkip(int pointNum, int numSamples) { return smoothPointsX[pointNum].skip(numSamples); }
+
+    float getPointYSkip(int pointNum, int numSamples) { return smoothPointsY[pointNum].skip(numSamples); }
+
 private:
     AudioProcessorValueTreeState& parameters;
 

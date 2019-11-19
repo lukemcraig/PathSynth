@@ -299,23 +299,34 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
     parameterVtsHelper.updateSmoothers();
 
-    // todo render subblocks of 32 samples updating the path each time.
-    setPath();
-
     updateEnvParams();
 
     buffer.clear(0, 0, buffer.getNumSamples());
 
     oversampledBuffer.clear(0, 0, oversampledBuffer.getNumSamples());
 
-    keyboardState.processNextMidiBuffer(midiMessages,
-                                        0,
-                                        buffer.getNumSamples() * oversampleFactor,
-                                        true);
-    synthesiser.renderNextBlock(oversampledBuffer,
-                                midiMessages,
-                                0,
-                                buffer.getNumSamples() * oversampleFactor);
+    {
+        int numSamples = 32 * oversampleFactor;
+        int totalSamples = buffer.getNumSamples() * oversampleFactor;
+        for (int startSample = 0; startSample < totalSamples; startSample += numSamples)
+        {
+            setPath(numSamples);
+
+            keyboardState.processNextMidiBuffer(midiMessages, startSample, numSamples, true);
+            synthesiser.renderNextBlock(oversampledBuffer, midiMessages, startSample, numSamples);
+        }
+        // in case the buffer didn't divide evenly. TODO double check this
+        const int numSamplesLeft = totalSamples % numSamples;
+        if (numSamplesLeft > 0)
+        {
+            const int startSample = totalSamples - numSamplesLeft;
+
+            setPath(numSamplesLeft);
+
+            keyboardState.processNextMidiBuffer(midiMessages, startSample, numSamplesLeft, true);
+            synthesiser.renderNextBlock(oversampledBuffer, midiMessages, startSample, numSamplesLeft);
+        }
+    }
 
     auto bufferWrite = buffer.getWritePointer(0);
     auto oversampleWrite = oversampledBuffer.getWritePointer(0);
@@ -442,22 +453,22 @@ void PathSynthAudioProcessor::setOversampleFactor(int newOversampleFactor)
 }
 
 //==============================================================================
-void PathSynthAudioProcessor::setPath()
+void PathSynthAudioProcessor::setPath(int numSamples)
 {
     //todo check if it changed
     straightPath.clear();
 
     const Point<float> firstPointPos{
-        parameterVtsHelper.getPointX(0),
-        parameterVtsHelper.getPointY(0)
+        parameterVtsHelper.getPointXSkip(0, numSamples),
+        parameterVtsHelper.getPointYSkip(0, numSamples)
     };
     straightPath.startNewSubPath(firstPointPos);
 
     for (auto i = 1; i < PathSynthConstants::numControlPoints; ++i)
     {
         const Point<float> pointPos{
-            parameterVtsHelper.getPointX(i),
-            parameterVtsHelper.getPointY(i)
+            parameterVtsHelper.getPointXSkip(i, numSamples),
+            parameterVtsHelper.getPointYSkip(i, numSamples)
         };
         straightPath.lineTo(pointPos);
     }

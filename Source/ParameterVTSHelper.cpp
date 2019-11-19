@@ -18,10 +18,10 @@ ParameterVTSHelper::ParameterVTSHelper(AudioProcessorValueTreeState& p) : parame
 void ParameterVTSHelper::resetSmoothers(double sampleRate)
 {
     for (auto& smoother : smoothPointsX)
-        smoother.reset(sampleRate, 0.1);
+        smoother.reset(sampleRate, 0.01);
 
     for (auto& smoother : smoothPointsY)
-        smoother.reset(sampleRate, 0.1);
+        smoother.reset(sampleRate, 0.01);
 }
 
 void ParameterVTSHelper::instantlyUpdateSmoothers()
