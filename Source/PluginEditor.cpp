@@ -59,6 +59,13 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     directionBox.addItem("Y", 2);
     directionAttachment.reset(new ComboBoxAttachment(parameters, "direction", directionBox));
 
+    outGainLabel.setText("Out", dontSendNotification);
+    makeLabelUpperCase(outGainLabel);
+    addAndMakeVisible(outGainLabel);
+    addAndMakeVisible(outGainSlider);
+    outGainSlider.setSliderStyle(Slider::Rotary);
+    outGainAttachment.reset(new SliderAttachment(parameters, "outgain", outGainSlider));
+
     setupAdsrControl(attackLabel, attackSlider, attackAttachment, "Attack", "attack");
     setupAdsrControl(decayLabel, decaySlider, decayAttachment, "Decay", "decay");
     setupAdsrControl(sustainLabel, sustainSlider, sustainAttachment, "Sustain", "sustain");
@@ -71,7 +78,8 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     lookAndFeel.setColour(Slider::trackColourId, Colour(0xffa84350));
     lookAndFeel.setColour(Slider::backgroundColourId, Colour(0xffdac9cb));
     lookAndFeel.setColour(Slider::thumbColourId, Colour(0xff98acb9));
-    
+    lookAndFeel.setColour(Slider::rotarySliderOutlineColourId, Colour(0xffdac9cb));
+     lookAndFeel.setColour(Slider::rotarySliderFillColourId, Colour(0xffa84350));
 
     lookAndFeel.setColour(ComboBox::backgroundColourId, Colour(0xffdcc296));
     lookAndFeel.setColour(ComboBox::textColourId, Colours::black);
@@ -175,14 +183,20 @@ void PathSynthAudioProcessorEditor::resized()
     keyboardComponent.setBounds(area.removeFromBottom(100));
     area.removeFromBottom(10);
 
-    auto directionArea = area.removeFromBottom(20);
+    auto belowPanels = area.removeFromBottom(64);
+
+    auto outArea = belowPanels.removeFromRight(belowPanels.proportionOfWidth(0.25f));
+    outGainLabel.setBounds(outArea.removeFromLeft(1.2f*outGainLabel.getFont().getStringWidth(outGainLabel.getText())));
+    outGainSlider.setBounds(outArea);
+
+    auto directionArea = belowPanels.removeFromBottom(20);
     directionLabel.setBounds(
         directionArea.removeFromLeft(directionLabel.getFont().getStringWidth(directionLabel.getText())));
     directionBox.setBounds(directionArea);
 
     area.removeFromBottom(10);
 
-    auto smoothArea = area.removeFromBottom(20);
+    auto smoothArea = belowPanels.removeFromBottom(20);
     smoothLabel.setBounds(smoothArea.removeFromLeft(smoothLabel.getFont().getStringWidth(smoothLabel.getText())));
     smoothSlider.setBounds(smoothArea);
 

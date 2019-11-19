@@ -80,6 +80,7 @@ private:
     int numVoices{4};
     ADSR::Parameters envParams;
     Synthesiser synthesiser;
+    static constexpr int samplesPerSubBlock = 32;
 
     static constexpr int numCoeffs{6};
     hiir::Downsampler2xFpu<numCoeffs> downsampler;

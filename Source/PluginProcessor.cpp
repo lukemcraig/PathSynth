@@ -21,6 +21,25 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                             "Direction",
                                                             StringArray{"X", "Y"},
                                                             0));
+    params.push_back(std::make_unique<AudioParameterFloat>("outgain",
+                                                           "Out Gain",
+                                                           NormalisableRange<float>(0.0f,
+                                                                                    1.0f,
+                                                                                    0.0f,
+                                                                                    0.5f,
+                                                                                    false),
+                                                           0.5f,
+                                                           String(),
+                                                           AudioProcessorParameter::genericParameter,
+                                                           [](const float value, int /*maximumStringLength*/)
+                                                           {
+                                                               return String(Decibels::gainToDecibels(value), 2) +
+                                                                   " dB";
+                                                           },
+                                                           [](const String& text)
+                                                           {
+                                                               return Decibels::decibelsToGain(text.getFloatValue());
+                                                           }));
     for (auto i = 0; i < PathSynthConstants::numControlPoints; ++i)
     {
         auto x = std::cos((static_cast<float>(i) / PathSynthConstants::numControlPoints)
@@ -305,8 +324,8 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
     oversampledBuffer.clear(0, 0, oversampledBuffer.getNumSamples());
 
-    {
-        int numSamples = 32 * oversampleFactor;
+    {        
+        int numSamples = samplesPerSubBlock * oversampleFactor;
         int totalSamples = buffer.getNumSamples() * oversampleFactor;
         for (int startSample = 0; startSample < totalSamples; startSample += numSamples)
         {
@@ -363,6 +382,9 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     {
         bufferWrite[i] = dcBlocker.pushSample(bufferWrite[i]);
     }
+
+    // todo smoothing
+    buffer.applyGain(0,0,buffer.getNumSamples(),*parameters.getRawParameterValue("outgain"));
 
     // copy the processed channel to all the other channels
     for (auto i = 1; i < getTotalNumOutputChannels(); ++i)
