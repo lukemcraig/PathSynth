@@ -1,9 +1,9 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "PathSynthConstants.h"
 #include "PathVoice.h"
 #include "PathSound.h"
 #include "hiir/PolyphaseIir2Designer.h"
+#include "PathSynthConstants.h"
 
 AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
@@ -151,7 +151,8 @@ PathSynthAudioProcessor::PathSynthAudioProcessor(): AudioProcessor(
                                                     parameters(*this,
                                                                nullptr,
                                                                "PathSynth",
-                                                               createParameterLayout())
+                                                               createParameterLayout()),
+                                                    parameterVtsHelper(parameters)
 {
     for (auto i = 0; i < numVoices; ++i)
     {
@@ -248,6 +249,10 @@ void PathSynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlo
     hiir::PolyphaseIir2Designer::compute_coefs(coefs3, 100.0, 0.1);
     downsampler3.set_coefs(coefs3);
     downsampler3.clear_buffers();
+
+    dcBlocker.reset();
+
+    parameterVtsHelper.resetSmoothers(sampleRate);
 }
 
 void PathSynthAudioProcessor::releaseResources()
@@ -292,7 +297,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 {
     ScopedNoDenormals noDenormals;
 
-    setPath();
+    parameterVtsHelper.updateSmoothers();
 
     updateEnvParams();
 
@@ -300,39 +305,63 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
     oversampledBuffer.clear(0, 0, oversampledBuffer.getNumSamples());
 
-    keyboardState.processNextMidiBuffer(midiMessages,
-                                        0,
-                                        buffer.getNumSamples() * oversampleFactor,
-                                        true);
-    synthesiser.renderNextBlock(oversampledBuffer,
-                                midiMessages,
-                                0,
-                                buffer.getNumSamples() * oversampleFactor);
+    {
+        int numSamples = 32 * oversampleFactor;
+        int totalSamples = buffer.getNumSamples() * oversampleFactor;
+        for (int startSample = 0; startSample < totalSamples; startSample += numSamples)
+        {
+            setPath(numSamples);
+
+            keyboardState.processNextMidiBuffer(midiMessages, startSample, numSamples, true);
+            synthesiser.renderNextBlock(oversampledBuffer, midiMessages, startSample, numSamples);
+        }
+        // in case the buffer didn't divide evenly. TODO double check this
+        const int numSamplesLeft = totalSamples % numSamples;
+        if (numSamplesLeft > 0)
+        {
+            const int startSample = totalSamples - numSamplesLeft;
+
+            setPath(numSamplesLeft);
+
+            keyboardState.processNextMidiBuffer(midiMessages, startSample, numSamplesLeft, true);
+            synthesiser.renderNextBlock(oversampledBuffer, midiMessages, startSample, numSamplesLeft);
+        }
+    }
 
     auto bufferWrite = buffer.getWritePointer(0);
-    auto channelRead = oversampledBuffer.getWritePointer(0);
+    auto oversampleWrite = oversampledBuffer.getWritePointer(0);
 
     if (oversampleFactor >= 8)
     {
-        downsampler3.process_block(channelRead,
-                                   channelRead,
+        //8x to 4x
+        downsampler3.process_block(oversampleWrite,
+                                   oversampleWrite,
                                    buffer.getNumSamples() * 4);
     }
     if (oversampleFactor >= 4)
     {
-        downsampler2.process_block(channelRead,
-                                   channelRead,
+        //4x to 2x
+        downsampler2.process_block(oversampleWrite,
+                                   oversampleWrite,
                                    buffer.getNumSamples() * 2);
     }
     if (oversampleFactor >= 2)
     {
-        downsampler.process_block(bufferWrite,
-                                  channelRead,
+        //2x to 1x
+        downsampler.process_block(bufferWrite, // out
+                                  oversampleWrite, // in
                                   buffer.getNumSamples());
     }
     else
     {
+        //1x to 1x
         buffer.copyFrom(0, 0, oversampledBuffer, 0, 0, buffer.getNumSamples());
+    }
+
+    // filter dc offset
+    for (int i = 0; i < buffer.getNumSamples(); ++i)
+    {
+        bufferWrite[i] = dcBlocker.pushSample(bufferWrite[i]);
     }
 
     // copy the processed channel to all the other channels
@@ -381,6 +410,7 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
         if (xmlState->hasTagName(parameters.state.getType()))
         {
             parameters.replaceState(ValueTree::fromXml(*xmlState));
+            parameterVtsHelper.instantlyUpdateSmoothers();
         }
     }
 }
@@ -423,22 +453,22 @@ void PathSynthAudioProcessor::setOversampleFactor(int newOversampleFactor)
 }
 
 //==============================================================================
-void PathSynthAudioProcessor::setPath()
+void PathSynthAudioProcessor::setPath(int numSamples)
 {
     //todo check if it changed
     straightPath.clear();
 
     const Point<float> firstPointPos{
-        *parameters.getRawParameterValue("point0x"),
-        *parameters.getRawParameterValue("point0y")
+        parameterVtsHelper.getPointXSkip(0, numSamples),
+        parameterVtsHelper.getPointYSkip(0, numSamples)
     };
     straightPath.startNewSubPath(firstPointPos);
 
     for (auto i = 1; i < PathSynthConstants::numControlPoints; ++i)
     {
         const Point<float> pointPos{
-            *parameters.getRawParameterValue("point" + String(i) + "x"),
-            *parameters.getRawParameterValue("point" + String(i) + "y")
+            parameterVtsHelper.getPointXSkip(i, numSamples),
+            parameterVtsHelper.getPointYSkip(i, numSamples)
         };
         straightPath.lineTo(pointPos);
     }
@@ -446,11 +476,11 @@ void PathSynthAudioProcessor::setPath()
 
     processorPath = straightPath;
     const auto smoothPathBounds = processorPath.getBounds();
-    processorPath.applyTransform(
+    /*processorPath.applyTransform(
         AffineTransform::translation(
             -smoothPathBounds.getCentreX(),
             -smoothPathBounds.getCentreY()).followedBy(AffineTransform::scale(1.0f / smoothPathBounds.getWidth(),
-                                                                              1.0f / smoothPathBounds.getHeight())));
+                                                                              1.0f / smoothPathBounds.getHeight())));*/
 
     const auto smoothing = *parameters.getRawParameterValue("smoothing");
     processorPath = processorPath.createPathWithRoundedCorners(smoothing);

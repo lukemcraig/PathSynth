@@ -2,6 +2,8 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "hiir/Downsampler2xFpu.h"
+#include "DcBlocker.h"
+#include "ParameterVTSHelper.h"
 
 //==============================================================================
 /**
@@ -69,10 +71,15 @@ public:
     //==============================================================================
 private:
     AudioProcessorValueTreeState parameters;
+    ParameterVTSHelper parameterVtsHelper;
     MidiKeyboardState keyboardState;
 
     Path straightPath{};
     Path processorPath{};
+
+    int numVoices{4};
+    ADSR::Parameters envParams;
+    Synthesiser synthesiser;
 
     static constexpr int numCoeffs{6};
     hiir::Downsampler2xFpu<numCoeffs> downsampler;
@@ -84,12 +91,10 @@ private:
     int oversampleFactor{2};
     AudioBuffer<float> oversampledBuffer;
 
-    int numVoices{4};
-    ADSR::Parameters envParams;
-    Synthesiser synthesiser;
+    DcBlocker dcBlocker;
 
     //==============================================================================
-    void setPath();
+    void setPath(int numSamples);
 
     void updateEnvParams();
 
