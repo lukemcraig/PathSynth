@@ -81,6 +81,10 @@ private:
     Slider releaseSlider;
     std::unique_ptr<SliderAttachment> releaseAttachment;
 
+    Label outGainLabel;
+    Slider outGainSlider;
+    std::unique_ptr<SliderAttachment> outGainAttachment;
+
     Label nameLabel;
     Path titlePath;
 
