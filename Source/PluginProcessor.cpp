@@ -1,9 +1,9 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "PathSynthConstants.h"
 #include "PathVoice.h"
 #include "PathSound.h"
 #include "hiir/PolyphaseIir2Designer.h"
+#include "PathSynthConstants.h"
 
 AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
@@ -151,7 +151,8 @@ PathSynthAudioProcessor::PathSynthAudioProcessor(): AudioProcessor(
                                                     parameters(*this,
                                                                nullptr,
                                                                "PathSynth",
-                                                               createParameterLayout())
+                                                               createParameterLayout()),
+                                                    parameterVtsHelper(parameters)
 {
     for (auto i = 0; i < numVoices; ++i)
     {
@@ -250,6 +251,8 @@ void PathSynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlo
     downsampler3.clear_buffers();
 
     dcBlocker.reset();
+
+    parameterVtsHelper.resetSmoothers(sampleRate);
 }
 
 void PathSynthAudioProcessor::releaseResources()
@@ -294,6 +297,9 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 {
     ScopedNoDenormals noDenormals;
 
+    parameterVtsHelper.updateSmoothers();
+
+    // todo render subblocks of 32 samples updating the path each time.
     setPath();
 
     updateEnvParams();
@@ -393,6 +399,7 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
         if (xmlState->hasTagName(parameters.state.getType()))
         {
             parameters.replaceState(ValueTree::fromXml(*xmlState));
+            parameterVtsHelper.instantlyUpdateSmoothers();
         }
     }
 }
@@ -441,16 +448,16 @@ void PathSynthAudioProcessor::setPath()
     straightPath.clear();
 
     const Point<float> firstPointPos{
-        *parameters.getRawParameterValue("point0x"),
-        *parameters.getRawParameterValue("point0y")
+        parameterVtsHelper.getPointX(0),
+        parameterVtsHelper.getPointY(0)
     };
     straightPath.startNewSubPath(firstPointPos);
 
     for (auto i = 1; i < PathSynthConstants::numControlPoints; ++i)
     {
         const Point<float> pointPos{
-            *parameters.getRawParameterValue("point" + String(i) + "x"),
-            *parameters.getRawParameterValue("point" + String(i) + "y")
+            parameterVtsHelper.getPointX(i),
+            parameterVtsHelper.getPointY(i)
         };
         straightPath.lineTo(pointPos);
     }

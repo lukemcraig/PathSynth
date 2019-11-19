@@ -3,6 +3,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "hiir/Downsampler2xFpu.h"
 #include "DcBlocker.h"
+#include "ParameterVTSHelper.h"
 
 //==============================================================================
 /**
@@ -70,6 +71,7 @@ public:
     //==============================================================================
 private:
     AudioProcessorValueTreeState parameters;
+    ParameterVTSHelper parameterVtsHelper;
     MidiKeyboardState keyboardState;
 
     Path straightPath{};
