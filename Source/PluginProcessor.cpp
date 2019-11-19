@@ -383,6 +383,9 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
         bufferWrite[i] = dcBlocker.pushSample(bufferWrite[i]);
     }
 
+    // todo smoothing
+    buffer.applyGain(0,0,buffer.getNumSamples(),*parameters.getRawParameterValue("outgain"));
+
     // copy the processed channel to all the other channels
     for (auto i = 1; i < getTotalNumOutputChannels(); ++i)
         buffer.copyFrom(i, 0, buffer, 0, 0, buffer.getNumSamples());
