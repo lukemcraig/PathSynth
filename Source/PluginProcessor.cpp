@@ -324,8 +324,8 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
     oversampledBuffer.clear(0, 0, oversampledBuffer.getNumSamples());
 
-    {
-        int numSamples = 32 * oversampleFactor;
+    {        
+        int numSamples = samplesPerSubBlock * oversampleFactor;
         int totalSamples = buffer.getNumSamples() * oversampleFactor;
         for (int startSample = 0; startSample < totalSamples; startSample += numSamples)
         {
