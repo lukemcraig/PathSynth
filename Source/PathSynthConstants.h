@@ -12,5 +12,5 @@
 struct PathSynthConstants
 {
 public:
-    static constexpr int numControlPoints{8};
+    static constexpr int numControlPoints{16};
 };

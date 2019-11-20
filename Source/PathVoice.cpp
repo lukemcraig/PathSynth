@@ -11,11 +11,10 @@
 #include "PathVoice.h"
 #include "PathSound.h"
 
-PathVoice::PathVoice(AudioProcessorValueTreeState& apvts, Path& pp, ADSR::Parameters& envParams,
-                     std::array<float, 128>& wavetable) : parameters(apvts),
-                                                          processorPath(pp),
-                                                          wavetable(wavetable),
-                                                          envParams(envParams)
+PathVoice::PathVoice(AudioProcessorValueTreeState& apvts, ADSR::Parameters& envParams,
+                     std::vector<float>& wavetable) : parameters(apvts),
+                                                      wavetable(wavetable),
+                                                      envParams(envParams)
 {
     envelope.setParameters(envParams);
 }
@@ -79,17 +78,10 @@ void PathVoice::controllerMoved(int controllerNumber, int newControllerValue)
 {
 }
 
-float PathVoice::getNextSample(const float length, const float direction)
+float PathVoice::getNextSample()
 {
-    /*const auto point = processorPath.getPointAlongPath(length * t);
-
-    float value;
-    if (direction == 0)
-        value = point.getX();
-    else
-        value = point.getY();*/
-    //todo interpolation
     const auto waveTablesize = wavetable.size();
+    //linear interpolation between points in the wavetable	
     auto iFloating = t * waveTablesize;
     iFloating = std::min(waveTablesize - 1.0f, iFloating);
     const int iv0 = std::floor(iFloating);
@@ -106,12 +98,9 @@ float PathVoice::getNextSample(const float length, const float direction)
     // if the path has duplicate points it sometimes returns nans
     if (std::isnan(value))
     {
-        //DBG("nan");
         value = prevValue;
     }
     prevValue = value;
-
-    //float value = std::sin(t * MathConstants<float>::pi);
 
     t += phaseIncrement;
 
@@ -129,11 +118,6 @@ void PathVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int startSampl
     {
         envelope.setParameters(envParams);
 
-        // todo don't need to do this for every voice
-        const auto length = processorPath.getLength();
-
-        const auto direction = *parameters.getRawParameterValue("direction");
-
         auto* channelData = outputBuffer.getWritePointer(0);
 
         for (auto sample = startSample; sample < startSample + numSamples; ++sample)
@@ -143,7 +127,7 @@ void PathVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int startSampl
                 const auto envValue = envelope.getNextSample();
                 if (envValue != 0.0f)
                 {
-                    const auto value = getNextSample(length, direction);
+                    const auto value = getNextSample();
                     channelData[sample] += value * level * envValue;
                 }
             }

@@ -173,9 +173,10 @@ PathSynthAudioProcessor::PathSynthAudioProcessor(): AudioProcessor(
                                                                createParameterLayout()),
                                                     parameterVtsHelper(parameters)
 {
+    wavetable.resize(1024);
     for (auto i = 0; i < numVoices; ++i)
     {
-        synthesiser.addVoice(new PathVoice(parameters, processorPath, envParams,wavetable));
+        synthesiser.addVoice(new PathVoice(parameters, envParams, wavetable));
     }
     synthesiser.addSound(new PathSound());
 }
@@ -449,7 +450,7 @@ void PathSynthAudioProcessor::setNumVoices(int newNumVoices)
     {
         for (auto i = synthNumVoices; i < numVoices; ++i)
         {
-            synthesiser.addVoice(new PathVoice(parameters, processorPath, envParams,wavetable));
+            synthesiser.addVoice(new PathVoice(parameters, envParams, wavetable));
         }
         jassert(numVoices==synthesiser.getNumVoices());
         return;
@@ -527,6 +528,7 @@ void PathSynthAudioProcessor::setPath(int numSamples)
             auto lineLength = line.getLength();
             if (distanceFromStart <= lineLength + accumulatedDistance)
             {
+                // todo nans
                 wavetable[i] = line.getPointAlongLine(distanceFromStart).getX();
                 filledValue = true;
             }

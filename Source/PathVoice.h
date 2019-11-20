@@ -14,7 +14,7 @@
 class PathVoice : public SynthesiserVoice
 {
 public:
-    PathVoice(AudioProcessorValueTreeState&, Path&, ADSR::Parameters&, std::array<float, 128>&);
+    PathVoice(AudioProcessorValueTreeState&, ADSR::Parameters&, std::vector<float>&);
 
     ~PathVoice() = default;
 
@@ -32,7 +32,7 @@ public:
 
     void controllerMoved(int controllerNumber, int newControllerValue) override;
 
-    float getNextSample(float length, float direction);
+    float getNextSample();
 
     void renderNextBlock(AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override;
 
@@ -40,8 +40,7 @@ public:
 
 private:
     AudioProcessorValueTreeState& parameters;
-    Path& processorPath;
-    std::array<float, 128>& wavetable;
+    std::vector<float>& wavetable;
 
     // todo parameterize
     float frequencyOfA = 440.0f;
