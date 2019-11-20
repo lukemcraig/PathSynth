@@ -11,9 +11,11 @@
 #include "PathVoice.h"
 #include "PathSound.h"
 
-PathVoice::PathVoice(AudioProcessorValueTreeState& apvts, Path& pp, ADSR::Parameters& envParams) : parameters(apvts),
-                                                                                                   processorPath(pp),
-                                                                                                   envParams(envParams)
+PathVoice::PathVoice(AudioProcessorValueTreeState& apvts, Path& pp, ADSR::Parameters& envParams,
+                     std::array<float, 128>& wavetable) : parameters(apvts),
+                                                          processorPath(pp),
+                                                          wavetable(wavetable),
+                                                          envParams(envParams)
 {
     envelope.setParameters(envParams);
 }
@@ -79,23 +81,27 @@ void PathVoice::controllerMoved(int controllerNumber, int newControllerValue)
 
 float PathVoice::getNextSample(const float length, const float direction)
 {
-    //const auto point = processorPath.getPointAlongPath(length * t);
+    /*const auto point = processorPath.getPointAlongPath(length * t);
 
-    //float value;
-    //if (direction == 0)
-    //    value = point.getX();
-    //else
-    //    value = point.getY();
+    float value;
+    if (direction == 0)
+        value = point.getX();
+    else
+        value = point.getY();*/
+    //todo interpolation
+    auto waveTablesize = wavetable.size();
+    const int i = std::floor(t * waveTablesize);
+    auto value = wavetable[i];
 
-    //// if the path has duplicate points it sometimes returns nans
-    //if (std::isnan(value))
-    //{
-    //    //DBG("nan");
-    //    value = prevValue;
-    //}
-    //prevValue = value;
+    // if the path has duplicate points it sometimes returns nans
+    if (std::isnan(value))
+    {
+        //DBG("nan");
+        value = prevValue;
+    }
+    prevValue = value;
 
-    float value = std::sin(t * MathConstants<float>::pi);
+    //float value = std::sin(t * MathConstants<float>::pi);
 
     t += phaseIncrement;
 

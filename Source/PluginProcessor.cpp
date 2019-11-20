@@ -175,7 +175,7 @@ PathSynthAudioProcessor::PathSynthAudioProcessor(): AudioProcessor(
 {
     for (auto i = 0; i < numVoices; ++i)
     {
-        synthesiser.addVoice(new PathVoice(parameters, processorPath, envParams));
+        synthesiser.addVoice(new PathVoice(parameters, processorPath, envParams,wavetable));
     }
     synthesiser.addSound(new PathSound());
 }
@@ -449,7 +449,7 @@ void PathSynthAudioProcessor::setNumVoices(int newNumVoices)
     {
         for (auto i = synthNumVoices; i < numVoices; ++i)
         {
-            synthesiser.addVoice(new PathVoice(parameters, processorPath, envParams));
+            synthesiser.addVoice(new PathVoice(parameters, processorPath, envParams,wavetable));
         }
         jassert(numVoices==synthesiser.getNumVoices());
         return;
@@ -542,10 +542,8 @@ void PathSynthAudioProcessor::setPath(int numSamples)
                 //DBG((moreToIterate ? "true" : "false"));
             }
         }
-
         //auto returnval = iterator.x2;
     }
-    DBG("");
 }
 
 //==============================================================================

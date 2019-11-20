@@ -14,7 +14,7 @@
 class PathVoice : public SynthesiserVoice
 {
 public:
-    PathVoice(AudioProcessorValueTreeState&, Path&, ADSR::Parameters&);
+    PathVoice(AudioProcessorValueTreeState&, Path&, ADSR::Parameters&, std::array<float, 128>&);
 
     ~PathVoice() = default;
 
@@ -41,6 +41,7 @@ public:
 private:
     AudioProcessorValueTreeState& parameters;
     Path& processorPath;
+    std::array<float, 128>& wavetable;
 
     // todo parameterize
     float frequencyOfA = 440.0f;
