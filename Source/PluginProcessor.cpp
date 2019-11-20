@@ -510,10 +510,42 @@ void PathSynthAudioProcessor::setPath(int numSamples)
     float wavetableLength = wavetable.size();
     auto pathLength = processorPath.getLength();
     //auto pathLengthOverWaveLength = pathLength/wavetableLength;
+    PathFlatteningIterator iterator(processorPath);
+    iterator.next();
+
+    auto accumulatedDistance = 0.0f;
     for (auto i = 0; i < wavetable.size(); ++i)
     {
-        wavetable[i] = processorPath.getPointAlongPath((i / wavetableLength) * pathLength).getX();
+        auto distanceFromStart = (i / wavetableLength) * pathLength;
+
+        //wavetable[i] = processorPath.getPointAlongPath(distanceFromStart).getX();
+
+        bool filledValue = false;
+        while (!filledValue)
+        {
+            const Line<float> line(iterator.x1, iterator.y1, iterator.x2, iterator.y2);
+            auto lineLength = line.getLength();
+            if (distanceFromStart <= lineLength + accumulatedDistance)
+            {
+                wavetable[i] = line.getPointAlongLine(distanceFromStart).getX();
+                filledValue = true;
+            }
+            else
+            {
+                accumulatedDistance += lineLength;
+                //distanceFromStart -= lineLength;
+                auto moreToIterate = iterator.next();
+                if (!moreToIterate)
+                {
+                    break;
+                }
+                //DBG((moreToIterate ? "true" : "false"));
+            }
+        }
+
+        //auto returnval = iterator.x2;
     }
+    DBG("");
 }
 
 //==============================================================================
