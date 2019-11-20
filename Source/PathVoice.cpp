@@ -89,9 +89,19 @@ float PathVoice::getNextSample(const float length, const float direction)
     else
         value = point.getY();*/
     //todo interpolation
-    auto waveTablesize = wavetable.size();
-    const int i = std::floor(t * waveTablesize);
-    auto value = wavetable[i];
+    const auto waveTablesize = wavetable.size();
+    auto iFloating = t * waveTablesize;
+    iFloating = std::min(waveTablesize - 1.0f, iFloating);
+    const int iv0 = std::floor(iFloating);
+    const int iv1 = std::ceil(iFloating);
+    const auto b = iFloating - iv0;
+
+    auto v0 = wavetable[iv0];
+    auto v1 = wavetable[iv1];
+
+    auto interpolated = (1.0 - b) * v0 + b * v1;
+
+    auto value = interpolated;
 
     // if the path has duplicate points it sometimes returns nans
     if (std::isnan(value))
