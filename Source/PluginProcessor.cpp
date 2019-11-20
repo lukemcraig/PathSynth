@@ -324,7 +324,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
     oversampledBuffer.clear(0, 0, oversampledBuffer.getNumSamples());
 
-    {        
+    {
         int numSamples = samplesPerSubBlock * oversampleFactor;
         int totalSamples = buffer.getNumSamples() * oversampleFactor;
         for (int startSample = 0; startSample < totalSamples; startSample += numSamples)
@@ -384,7 +384,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     }
 
     // todo smoothing
-    buffer.applyGain(0,0,buffer.getNumSamples(),*parameters.getRawParameterValue("outgain"));
+    buffer.applyGain(0, 0, buffer.getNumSamples(), *parameters.getRawParameterValue("outgain"));
 
     // copy the processed channel to all the other channels
     for (auto i = 1; i < getTotalNumOutputChannels(); ++i)
@@ -506,6 +506,14 @@ void PathSynthAudioProcessor::setPath(int numSamples)
 
     const auto smoothing = *parameters.getRawParameterValue("smoothing");
     processorPath = processorPath.createPathWithRoundedCorners(smoothing);
+
+    float wavetableLength = wavetable.size();
+    auto pathLength = processorPath.getLength();
+    //auto pathLengthOverWaveLength = pathLength/wavetableLength;
+    for (auto i = 0; i < wavetable.size(); ++i)
+    {
+        wavetable[i] = processorPath.getPointAlongPath((i / wavetableLength) * pathLength).getX();
+    }
 }
 
 //==============================================================================

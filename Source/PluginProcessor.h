@@ -94,6 +94,8 @@ private:
 
     DcBlocker dcBlocker;
 
+    std::array<float,128> wavetable;
+
     //==============================================================================
     void setPath(int numSamples);
 

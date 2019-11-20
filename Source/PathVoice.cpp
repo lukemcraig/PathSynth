@@ -79,21 +79,23 @@ void PathVoice::controllerMoved(int controllerNumber, int newControllerValue)
 
 float PathVoice::getNextSample(const float length, const float direction)
 {
-    const auto point = processorPath.getPointAlongPath(length * t);
+    //const auto point = processorPath.getPointAlongPath(length * t);
 
-    float value;
-    if (direction == 0)
-        value = point.getX();
-    else
-        value = point.getY();
+    //float value;
+    //if (direction == 0)
+    //    value = point.getX();
+    //else
+    //    value = point.getY();
 
-    // if the path has duplicate points it sometimes returns nans
-    if (std::isnan(value))
-    {
-        //DBG("nan");
-        value = prevValue;
-    }
-    prevValue = value;
+    //// if the path has duplicate points it sometimes returns nans
+    //if (std::isnan(value))
+    //{
+    //    //DBG("nan");
+    //    value = prevValue;
+    //}
+    //prevValue = value;
+
+    float value = std::sin(t * MathConstants<float>::pi);
 
     t += phaseIncrement;
 
