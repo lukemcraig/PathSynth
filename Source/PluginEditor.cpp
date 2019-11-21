@@ -34,6 +34,7 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     oversamplingBox.addItem("2x", 2);
     oversamplingBox.addItem("4x", 4);
     oversamplingBox.addItem("8x", 8);
+    oversamplingBox.addItem("16x", 16);
     oversamplingBox.setSelectedId(processor.getOversampleFactor());
     oversamplingBox.addListener(this);
 
@@ -41,7 +42,7 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     makeLabelUpperCase(voicesLabel);
     addAndMakeVisible(voicesLabel);
     addAndMakeVisible(voicesSlider);
-    voicesSlider.setRange(1, 10, 1);
+    voicesSlider.setRange(1, PathSynthConstants::maxVoices, 1);
     voicesSlider.setValue(processor.getNumVoices());
     voicesSlider.addListener(this);
 
@@ -79,7 +80,7 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     lookAndFeel.setColour(Slider::backgroundColourId, Colour(0xffdac9cb));
     lookAndFeel.setColour(Slider::thumbColourId, Colour(0xff98acb9));
     lookAndFeel.setColour(Slider::rotarySliderOutlineColourId, Colour(0xffdac9cb));
-     lookAndFeel.setColour(Slider::rotarySliderFillColourId, Colour(0xffa84350));
+    lookAndFeel.setColour(Slider::rotarySliderFillColourId, Colour(0xffa84350));
 
     lookAndFeel.setColour(ComboBox::backgroundColourId, Colour(0xffdcc296));
     lookAndFeel.setColour(ComboBox::textColourId, Colours::black);
@@ -186,7 +187,8 @@ void PathSynthAudioProcessorEditor::resized()
     auto belowPanels = area.removeFromBottom(64);
 
     auto outArea = belowPanels.removeFromRight(belowPanels.proportionOfWidth(0.25f));
-    outGainLabel.setBounds(outArea.removeFromLeft(1.2f*outGainLabel.getFont().getStringWidth(outGainLabel.getText())));
+    outGainLabel.
+        setBounds(outArea.removeFromLeft(1.2f * outGainLabel.getFont().getStringWidth(outGainLabel.getText())));
     outGainSlider.setBounds(outArea);
 
     auto directionArea = belowPanels.removeFromBottom(20);

@@ -270,6 +270,11 @@ void PathSynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlo
     downsampler3.set_coefs(coefs3);
     downsampler3.clear_buffers();
 
+    double coefs4[numCoeffs4]{};
+    hiir::PolyphaseIir2Designer::compute_coefs(coefs4, 100.0, 0.1);
+    downsampler4.set_coefs(coefs4);
+    downsampler4.clear_buffers();
+
     dcBlocker.reset();
 
     parameterVtsHelper.resetSmoothers(sampleRate);
@@ -350,7 +355,13 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
     auto bufferWrite = buffer.getWritePointer(0);
     auto oversampleWrite = oversampledBuffer.getWritePointer(0);
-
+    if (oversampleFactor >= 16)
+    {
+        //16x to 8x
+        downsampler4.process_block(oversampleWrite,
+                                   oversampleWrite,
+                                   buffer.getNumSamples() * 8);
+    }
     if (oversampleFactor >= 8)
     {
         //8x to 4x
@@ -422,7 +433,7 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
     {
         if (xmlState->hasAttribute("maxVoices"))
         {
-            setNumVoices(xmlState->getIntAttribute("maxVoices", 4));
+            setNumVoices(xmlState->getIntAttribute("maxVoices", 10));
             xmlState->removeAttribute("maxVoices");
         }
         if (xmlState->hasAttribute("oversampleFactor"))
@@ -513,7 +524,7 @@ void PathSynthAudioProcessor::setPath(int numSamples)
     //auto pathLengthOverWaveLength = pathLength/wavetableLength;
     PathFlatteningIterator iterator(processorPath);
     iterator.next();
-    DBG("---");
+
     auto accumulatedDistance = 0.0f;
     for (auto i = 0; i < wavetable.size(); ++i)
     {
@@ -529,7 +540,7 @@ void PathSynthAudioProcessor::setPath(int numSamples)
             if (distanceFromStart <= lineLength + accumulatedDistance)
             {
                 // todo nans
-                wavetable[i] = line.getPointAlongLine(distanceFromStart-accumulatedDistance).getX();
+                wavetable[i] = line.getPointAlongLine(distanceFromStart - accumulatedDistance).getX();
                 //auto oughtToBe = processorPath.getPointAlongPath(distanceFromStart).getX();
                 filledValue = true;
             }
