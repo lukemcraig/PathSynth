@@ -519,18 +519,17 @@ void PathSynthAudioProcessor::setPath(int numSamples)
     const auto smoothing = *parameters.getRawParameterValue("smoothing");
     processorPath = processorPath.createPathWithRoundedCorners(smoothing);
 
-    const float wavetableLength = wavetable.size();
-    const auto pathLength = processorPath.getLength();
-    //auto pathLengthOverWaveLength = pathLength/wavetableLength;
+    auto pathLengthOverWaveLength = processorPath.getLength() / wavetable.size();
+
     PathFlatteningIterator iterator(processorPath);
     iterator.next();
 
     auto accumulatedDistance = 0.0f;
     for (auto i = 0; i < wavetable.size(); ++i)
     {
-        const auto distanceFromStart = (static_cast<float>(i) / wavetableLength) * pathLength;
-
-        //wavetable[i] = processorPath.getPointAlongPath(distanceFromStart).getX();
+        auto distanceFromStart = static_cast<float>(i) * pathLengthOverWaveLength;
+        if (i == 0)
+            distanceFromStart = (static_cast<float>(i) + 0.1f) * pathLengthOverWaveLength;
 
         bool filledValue = false;
         while (!filledValue)
@@ -539,22 +538,21 @@ void PathSynthAudioProcessor::setPath(int numSamples)
             auto lineLength = line.getLength();
             if (distanceFromStart <= lineLength + accumulatedDistance)
             {
-                // todo nans
                 wavetable[i] = line.getPointAlongLine(distanceFromStart - accumulatedDistance).getX();
-                //auto oughtToBe = processorPath.getPointAlongPath(distanceFromStart).getX();
+                jassert(!std::isnan(wavetable[i]));
                 filledValue = true;
             }
             else
             {
                 accumulatedDistance += lineLength;
-                auto moreToIterate = iterator.next();
+                const auto moreToIterate = iterator.next();
                 if (!moreToIterate)
-                {
                     break;
-                }
             }
         }
-        //auto returnval = iterator.x2;
+        // if we reached the end of the path without finishing, use the final value
+        if (!filledValue)
+            wavetable[i] = iterator.x2;
     }
 }
 
