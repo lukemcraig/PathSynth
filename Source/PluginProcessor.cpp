@@ -341,7 +341,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
         {
             const int startSample = totalSamples - numSamplesLeft;
 
-            setPath(numSamplesLeft);
+            //setPath(numSamplesLeft);
 
             keyboardState.processNextMidiBuffer(midiMessages, startSample, numSamplesLeft, true);
             synthesiser.renderNextBlock(oversampledBuffer, midiMessages, startSample, numSamplesLeft);
@@ -498,7 +498,7 @@ void PathSynthAudioProcessor::setPath(int numSamples)
     straightPath.closeSubPath();
 
     processorPath = straightPath;
-    const auto smoothPathBounds = processorPath.getBounds();
+    //const auto smoothPathBounds = processorPath.getBounds();
     /*processorPath.applyTransform(
         AffineTransform::translation(
             -smoothPathBounds.getCentreX(),
@@ -508,16 +508,16 @@ void PathSynthAudioProcessor::setPath(int numSamples)
     const auto smoothing = *parameters.getRawParameterValue("smoothing");
     processorPath = processorPath.createPathWithRoundedCorners(smoothing);
 
-    float wavetableLength = wavetable.size();
-    auto pathLength = processorPath.getLength();
+    const float wavetableLength = wavetable.size();
+    const auto pathLength = processorPath.getLength();
     //auto pathLengthOverWaveLength = pathLength/wavetableLength;
     PathFlatteningIterator iterator(processorPath);
     iterator.next();
-
+    DBG("---");
     auto accumulatedDistance = 0.0f;
     for (auto i = 0; i < wavetable.size(); ++i)
     {
-        auto distanceFromStart = (i / wavetableLength) * pathLength;
+        const auto distanceFromStart = (static_cast<float>(i) / wavetableLength) * pathLength;
 
         //wavetable[i] = processorPath.getPointAlongPath(distanceFromStart).getX();
 
@@ -529,19 +529,18 @@ void PathSynthAudioProcessor::setPath(int numSamples)
             if (distanceFromStart <= lineLength + accumulatedDistance)
             {
                 // todo nans
-                wavetable[i] = line.getPointAlongLine(distanceFromStart).getX();
+                wavetable[i] = line.getPointAlongLine(distanceFromStart-accumulatedDistance).getX();
+                //auto oughtToBe = processorPath.getPointAlongPath(distanceFromStart).getX();
                 filledValue = true;
             }
             else
             {
                 accumulatedDistance += lineLength;
-                //distanceFromStart -= lineLength;
                 auto moreToIterate = iterator.next();
                 if (!moreToIterate)
                 {
                     break;
                 }
-                //DBG((moreToIterate ? "true" : "false"));
             }
         }
         //auto returnval = iterator.x2;
