@@ -51,7 +51,7 @@ void WaveDisplayComponent::update(Path smoothPath, const int direction)
     const auto newPathBounds = getBounds();
 
     smoothPath.applyTransform(
-        AffineTransform::translation(-newPathBounds.getCentreX(), -newPathBounds.getCentreY()*0.5f).followedBy(
+        AffineTransform::translation(-newPathBounds.getCentreX(), -newPathBounds.getCentreY() * 0.5f).followedBy(
             AffineTransform::scale(1.0f / newPathBounds.getWidth(), 1.0f / newPathBounds.getHeight())));
 
     const auto length = smoothPath.getLength();
@@ -60,14 +60,19 @@ void WaveDisplayComponent::update(Path smoothPath, const int direction)
 
     for (int i = 0; i < getWidth(); ++i)
     {
-        t = (static_cast<float>(i)+0.01f) / getWidth();
+        t = (static_cast<float>(i) + 0.01f) / getWidth();
         const auto point = smoothPath.getPointAlongPath(length * t);
         float pointValue;
         if (direction == 0)
-            pointValue = point.getX();
+        {
+            pointValue = -point.getX();
+            pointValue = (pointValue * getHeight() * 0.5f);
+        }
         else
+        {
             pointValue = point.getY();
-        pointValue = (pointValue * getHeight() * 0.5f) + (getHeight() * 0.5f);
+            pointValue = (pointValue * getHeight() * 0.5f) + (getHeight() * 0.5f);
+        }
         if (i == 0)
             signalPath.startNewSubPath(0, pointValue);
         else

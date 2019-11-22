@@ -93,7 +93,7 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
 
     setResizable(true, true);
     setResizeLimits(256, 256, 2048, 2048);
-    setSize(1024, 512);
+    setSize(885, 720);
 
     startTimer(100);
 }
