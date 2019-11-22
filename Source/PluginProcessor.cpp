@@ -515,6 +515,7 @@ void PathSynthAudioProcessor::setPath(int numSamples)
             -smoothPathBounds.getCentreX(),
             -smoothPathBounds.getCentreY()).followedBy(AffineTransform::scale(1.0f / smoothPathBounds.getWidth(),
                                                                               1.0f / smoothPathBounds.getHeight())));*/
+    const auto direction = *parameters.getRawParameterValue("direction");
 
     const auto smoothing = *parameters.getRawParameterValue("smoothing");
     processorPath = processorPath.createPathWithRoundedCorners(smoothing);
@@ -538,7 +539,11 @@ void PathSynthAudioProcessor::setPath(int numSamples)
             auto lineLength = line.getLength();
             if (distanceFromStart <= lineLength + accumulatedDistance)
             {
-                wavetable[i] = line.getPointAlongLine(distanceFromStart - accumulatedDistance).getX();
+                if (direction == 0)
+                    wavetable[i] = line.getPointAlongLine(distanceFromStart - accumulatedDistance).getX();
+                else
+                    wavetable[i] = line.getPointAlongLine(distanceFromStart - accumulatedDistance).getY();
+
                 jassert(!std::isnan(wavetable[i]));
                 filledValue = true;
             }
@@ -552,7 +557,10 @@ void PathSynthAudioProcessor::setPath(int numSamples)
         }
         // if we reached the end of the path without finishing, use the final value
         if (!filledValue)
-            wavetable[i] = iterator.x2;
+            if (direction == 0)
+                wavetable[i] = iterator.x2;
+            else
+                wavetable[i] = iterator.y2;
     }
 }
 
