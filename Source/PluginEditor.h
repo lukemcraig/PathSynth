@@ -30,6 +30,8 @@ public:
 
     static void setLabelAreaAboveCentered(Label& label, Rectangle<int>& labelArea);
 
+    static int getLabelWidth(Label& label);
+
     void resized() override;
 
     void timerCallback() override;
@@ -53,6 +55,10 @@ private:
 
     Label voicesLabel;
     Slider voicesSlider;
+
+    Label pitchStandardLabel;
+    Slider pitchStandardSlider;
+    std::unique_ptr<SliderAttachment> pitchStandardAttachment;
 
     Label oversamplingLabel;
     ComboBox oversamplingBox;

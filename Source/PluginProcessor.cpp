@@ -17,6 +17,16 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                                                     0.9f,
                                                                                     false),
                                                            100.0f));
+    params.push_back(std::make_unique<AudioParameterFloat>("frequencyOfA",
+                                                           "Pitch Standard",
+                                                           NormalisableRange<float>(392.0f, 493.88f, 0, 1.0f),
+                                                           440.0f,
+                                                           String(),
+                                                           AudioProcessorParameter::genericParameter,
+                                                           [](const float value, int /*maximumStringLength*/)
+                                                           {
+                                                               return String(value, 2) + " Hz";
+                                                           }));
     params.push_back(std::make_unique<AudioParameterChoice>("direction",
                                                             "Direction",
                                                             StringArray{"X", "Y"},

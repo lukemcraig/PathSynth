@@ -79,6 +79,13 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     outGainSlider.setSliderStyle(Slider::Rotary);
     outGainAttachment.reset(new SliderAttachment(parameters, "outgain", outGainSlider));
 
+    pitchStandardLabel.setText("A=", dontSendNotification);
+    makeLabelUpperCase(pitchStandardLabel);
+    addAndMakeVisible(pitchStandardLabel);
+    addAndMakeVisible(pitchStandardSlider);
+    //pitchStandardSlider.setSliderStyle(Slider::Rotary);
+    pitchStandardAttachment.reset(new SliderAttachment(parameters, "frequencyOfA", pitchStandardSlider));
+
     setupAdsrControl(attackLabel, attackSlider, attackAttachment, "Attack", "attack");
     setupAdsrControl(decayLabel, decaySlider, decayAttachment, "Decay", "decay");
     setupAdsrControl(sustainLabel, sustainSlider, sustainAttachment, "Sustain", "sustain");
@@ -154,32 +161,43 @@ void PathSynthAudioProcessorEditor::setLabelAreaAboveCentered(Label& label, Rect
             6 + label.getFont().getStringWidth(label.getText()), 16));
 }
 
+int PathSynthAudioProcessorEditor::getLabelWidth(Label& label)
+{
+    return label.getFont().getStringWidth(label.getText());
+}
+
 void PathSynthAudioProcessorEditor::resized()
 {
     auto area = getBounds();
 
     area.reduce(10, 10);
 
-    auto titleArea = area.removeFromTop(32);
+    auto titleAndSettingsArea = area.removeFromTop(48);
+    auto titleArea = titleAndSettingsArea.removeFromLeft(titlePath.getBounds().getWidth() + 10 + 100).removeFromTop(32);
     titleArea.removeFromLeft(titlePath.getBounds().getWidth() + 10);
     nameLabel.setBounds(titleArea.removeFromLeft(100));
 
     // padding
-    titleArea.removeFromLeft(titleArea.proportionOfWidth(0.02f));
+    titleArea.removeFromLeft(titleArea.proportionOfWidth(0.5f));
 
-    auto voicesOversamplingArea = titleArea;
+    auto settingsArea = titleAndSettingsArea;
+    auto settingsTopArea = settingsArea.removeFromTop(settingsArea.proportionOfHeight(0.5));
 
-    voicesLabel.setBounds(
-        voicesOversamplingArea.removeFromLeft(voicesLabel.getFont().getStringWidth(voicesLabel.getText())));
-    voicesSlider.setBounds(voicesOversamplingArea.removeFromLeft(voicesOversamplingArea.proportionOfWidth(0.25f)));
+    oversamplingLabel.setBounds(settingsTopArea.removeFromLeft(getLabelWidth(oversamplingLabel)));
+    oversamplingBox.setBounds(settingsTopArea.removeFromLeft(settingsArea.proportionOfWidth(0.3f)));
 
-    oversamplingLabel.setBounds(
-        voicesOversamplingArea.removeFromLeft(oversamplingLabel.getFont().getStringWidth(oversamplingLabel.getText())));
-    oversamplingBox.setBounds(voicesOversamplingArea.removeFromLeft(voicesOversamplingArea.proportionOfWidth(0.25f)));
+    wavetableLabel.setBounds(settingsTopArea.removeFromLeft(getLabelWidth(wavetableLabel)));
+    wavetableBox.setBounds(settingsTopArea);
 
-    wavetableLabel.setBounds(
-        voicesOversamplingArea.removeFromLeft(wavetableLabel.getFont().getStringWidth(wavetableLabel.getText())));
-    wavetableBox.setBounds(voicesOversamplingArea);
+    auto settingsArea2 = area.removeFromTop(32);
+
+    voicesLabel.setBounds(settingsArea2.removeFromLeft(getLabelWidth(voicesLabel)));
+    voicesSlider.setBounds(settingsArea2.removeFromLeft(settingsArea2.proportionOfWidth(0.5f)));
+
+    pitchStandardLabel.setBounds(settingsArea2.removeFromLeft(2 * getLabelWidth(pitchStandardLabel)));
+    pitchStandardSlider.setBounds(settingsArea2);
+
+    area.removeFromTop(10);
 
     auto adsrBounds = area.removeFromTop(area.proportionOfHeight(0.1f));
     auto adsrWidth = adsrBounds.getWidth() / 4.0f;
@@ -205,19 +223,17 @@ void PathSynthAudioProcessorEditor::resized()
     auto belowPanels = area.removeFromBottom(64);
 
     auto outArea = belowPanels.removeFromRight(belowPanels.proportionOfWidth(0.25f));
-    outGainLabel.
-        setBounds(outArea.removeFromLeft(1.2f * outGainLabel.getFont().getStringWidth(outGainLabel.getText())));
+    outGainLabel.setBounds(outArea.removeFromLeft(1.2f * getLabelWidth(outGainLabel)));
     outGainSlider.setBounds(outArea);
 
     auto directionArea = belowPanels.removeFromBottom(20);
-    directionLabel.setBounds(
-        directionArea.removeFromLeft(directionLabel.getFont().getStringWidth(directionLabel.getText())));
+    directionLabel.setBounds(directionArea.removeFromLeft(getLabelWidth(directionLabel)));
     directionBox.setBounds(directionArea);
 
     area.removeFromBottom(10);
 
     auto smoothArea = belowPanels.removeFromBottom(20);
-    smoothLabel.setBounds(smoothArea.removeFromLeft(smoothLabel.getFont().getStringWidth(smoothLabel.getText())));
+    smoothLabel.setBounds(smoothArea.removeFromLeft(getLabelWidth(smoothLabel)));
     smoothSlider.setBounds(smoothArea);
 
     planeComponent.setBounds(area.removeFromLeft(area.proportionOfWidth(0.5)).reduced(10));
