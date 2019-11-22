@@ -48,10 +48,10 @@ void WaveDisplayComponent::resized()
 
 void WaveDisplayComponent::update(Path smoothPath, const int direction)
 {
-    const auto newPathBounds = smoothPath.getBounds();
+    const auto newPathBounds = getBounds();
 
     smoothPath.applyTransform(
-        AffineTransform::translation(-newPathBounds.getCentreX(), -newPathBounds.getCentreY()).followedBy(
+        AffineTransform::translation(-newPathBounds.getCentreX(), -newPathBounds.getCentreY()*0.5f).followedBy(
             AffineTransform::scale(1.0f / newPathBounds.getWidth(), 1.0f / newPathBounds.getHeight())));
 
     const auto length = smoothPath.getLength();
