@@ -68,6 +68,10 @@ public:
 
     int getOversampleFactor() const { return oversampleFactor; }
 
+    void setWavetableSize(int newWavetableSize);
+
+    int getWavetableSize() const { return wavetable.size(); }
+
     //==============================================================================
 private:
     AudioProcessorValueTreeState parameters;
@@ -97,6 +101,7 @@ private:
 
     DcBlocker dcBlocker;
 
+    int nextWavetableSize{2048};
     std::vector<float> wavetable;
 
     //==============================================================================

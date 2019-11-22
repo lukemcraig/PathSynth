@@ -43,9 +43,9 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     for (auto i = 0; i < PathSynthConstants::numControlPoints; ++i)
     {
         auto x = std::cos((static_cast<float>(i) / PathSynthConstants::numControlPoints)
-            * MathConstants<float>::twoPi)*0.9f;
+            * MathConstants<float>::twoPi) * 0.9f;
         auto y = std::sin((static_cast<float>(i) / PathSynthConstants::numControlPoints)
-            * MathConstants<float>::twoPi)*0.9f;
+            * MathConstants<float>::twoPi) * 0.9f;
 
         params.push_back(std::make_unique<AudioParameterFloat>("point" + String(i) + "x",
                                                                "Point" + String(i) + "_X",
@@ -487,8 +487,17 @@ void PathSynthAudioProcessor::setOversampleFactor(int newOversampleFactor)
 }
 
 //==============================================================================
+void PathSynthAudioProcessor::setWavetableSize(int newWavetableSize)
+{
+    nextWavetableSize = newWavetableSize;
+}
+
+//==============================================================================
 void PathSynthAudioProcessor::setPath(int numSamples)
 {
+    if (nextWavetableSize != wavetable.size())
+        wavetable.resize(nextWavetableSize);
+
     //todo check if it changed
     straightPath.clear();
 
