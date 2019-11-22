@@ -68,6 +68,10 @@ public:
 
     int getOversampleFactor() const { return oversampleFactor; }
 
+    void setWavetableSize(int newWavetableSize);
+
+    int getWavetableSize() const { return wavetable.size(); }
+
     //==============================================================================
 private:
     AudioProcessorValueTreeState parameters;
@@ -77,7 +81,7 @@ private:
     Path straightPath{};
     Path processorPath{};
 
-    int numVoices{4};
+    int numVoices{10};
     ADSR::Parameters envParams;
     Synthesiser synthesiser;
     static constexpr int samplesPerSubBlock = 32;
@@ -88,11 +92,17 @@ private:
     hiir::Downsampler2xFpu<numCoeffs> downsampler2;
     static constexpr int numCoeffs3{6};
     hiir::Downsampler2xFpu<numCoeffs> downsampler3;
-    static constexpr int maxOversampleFactor{8};
+    static constexpr int numCoeffs4{6};
+    hiir::Downsampler2xFpu<numCoeffs> downsampler4;
+
+    static constexpr int maxOversampleFactor{16};
     int oversampleFactor{2};
     AudioBuffer<float> oversampledBuffer;
 
     DcBlocker dcBlocker;
+
+    int nextWavetableSize{1024};
+    std::vector<float> wavetable;
 
     //==============================================================================
     void setPath(int numSamples);

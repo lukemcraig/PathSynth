@@ -20,7 +20,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     params.push_back(std::make_unique<AudioParameterChoice>("direction",
                                                             "Direction",
                                                             StringArray{"X", "Y"},
-                                                            0));
+                                                            1));
     params.push_back(std::make_unique<AudioParameterFloat>("outgain",
                                                            "Out Gain",
                                                            NormalisableRange<float>(0.0f,
@@ -43,9 +43,9 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     for (auto i = 0; i < PathSynthConstants::numControlPoints; ++i)
     {
         auto x = std::cos((static_cast<float>(i) / PathSynthConstants::numControlPoints)
-            * MathConstants<float>::twoPi) * .25f;
+            * MathConstants<float>::twoPi) * 0.9f;
         auto y = std::sin((static_cast<float>(i) / PathSynthConstants::numControlPoints)
-            * MathConstants<float>::twoPi) * .25f;
+            * MathConstants<float>::twoPi) * 0.9f;
 
         params.push_back(std::make_unique<AudioParameterFloat>("point" + String(i) + "x",
                                                                "Point" + String(i) + "_X",
@@ -173,9 +173,10 @@ PathSynthAudioProcessor::PathSynthAudioProcessor(): AudioProcessor(
                                                                createParameterLayout()),
                                                     parameterVtsHelper(parameters)
 {
+    wavetable.resize(nextWavetableSize);
     for (auto i = 0; i < numVoices; ++i)
     {
-        synthesiser.addVoice(new PathVoice(parameters, processorPath, envParams));
+        synthesiser.addVoice(new PathVoice(parameters, envParams, wavetable));
     }
     synthesiser.addSound(new PathSound());
 }
@@ -269,6 +270,11 @@ void PathSynthAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlo
     downsampler3.set_coefs(coefs3);
     downsampler3.clear_buffers();
 
+    double coefs4[numCoeffs4]{};
+    hiir::PolyphaseIir2Designer::compute_coefs(coefs4, 100.0, 0.1);
+    downsampler4.set_coefs(coefs4);
+    downsampler4.clear_buffers();
+
     dcBlocker.reset();
 
     parameterVtsHelper.resetSmoothers(sampleRate);
@@ -324,7 +330,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
     oversampledBuffer.clear(0, 0, oversampledBuffer.getNumSamples());
 
-    {        
+    {
         int numSamples = samplesPerSubBlock * oversampleFactor;
         int totalSamples = buffer.getNumSamples() * oversampleFactor;
         for (int startSample = 0; startSample < totalSamples; startSample += numSamples)
@@ -340,7 +346,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
         {
             const int startSample = totalSamples - numSamplesLeft;
 
-            setPath(numSamplesLeft);
+            //setPath(numSamplesLeft);
 
             keyboardState.processNextMidiBuffer(midiMessages, startSample, numSamplesLeft, true);
             synthesiser.renderNextBlock(oversampledBuffer, midiMessages, startSample, numSamplesLeft);
@@ -349,7 +355,13 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
     auto bufferWrite = buffer.getWritePointer(0);
     auto oversampleWrite = oversampledBuffer.getWritePointer(0);
-
+    if (oversampleFactor >= 16)
+    {
+        //16x to 8x
+        downsampler4.process_block(oversampleWrite,
+                                   oversampleWrite,
+                                   buffer.getNumSamples() * 8);
+    }
     if (oversampleFactor >= 8)
     {
         //8x to 4x
@@ -384,7 +396,7 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     }
 
     // todo smoothing
-    buffer.applyGain(0,0,buffer.getNumSamples(),*parameters.getRawParameterValue("outgain"));
+    buffer.applyGain(0, 0, buffer.getNumSamples(), *parameters.getRawParameterValue("outgain"));
 
     // copy the processed channel to all the other channels
     for (auto i = 1; i < getTotalNumOutputChannels(); ++i)
@@ -411,6 +423,7 @@ void PathSynthAudioProcessor::getStateInformation(MemoryBlock& destData)
     const auto xml(state.createXml());
     xml->setAttribute("maxVoices", numVoices);
     xml->setAttribute("oversampleFactor", oversampleFactor);
+    xml->setAttribute("wavetableSize", static_cast<int>(wavetable.size()));
     copyXmlToBinary(*xml, destData);
 }
 
@@ -421,13 +434,18 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
     {
         if (xmlState->hasAttribute("maxVoices"))
         {
-            setNumVoices(xmlState->getIntAttribute("maxVoices", 4));
+            setNumVoices(xmlState->getIntAttribute("maxVoices", 10));
             xmlState->removeAttribute("maxVoices");
         }
         if (xmlState->hasAttribute("oversampleFactor"))
         {
             setOversampleFactor(xmlState->getIntAttribute("oversampleFactor", 4));
             xmlState->removeAttribute("oversampleFactor");
+        }
+        if (xmlState->hasAttribute("wavetableSize"))
+        {
+            setWavetableSize(xmlState->getIntAttribute("wavetableSize", 1024));
+            xmlState->removeAttribute("wavetableSize");
         }
         if (xmlState->hasTagName(parameters.state.getType()))
         {
@@ -449,7 +467,7 @@ void PathSynthAudioProcessor::setNumVoices(int newNumVoices)
     {
         for (auto i = synthNumVoices; i < numVoices; ++i)
         {
-            synthesiser.addVoice(new PathVoice(parameters, processorPath, envParams));
+            synthesiser.addVoice(new PathVoice(parameters, envParams, wavetable));
         }
         jassert(numVoices==synthesiser.getNumVoices());
         return;
@@ -475,8 +493,17 @@ void PathSynthAudioProcessor::setOversampleFactor(int newOversampleFactor)
 }
 
 //==============================================================================
+void PathSynthAudioProcessor::setWavetableSize(int newWavetableSize)
+{
+    nextWavetableSize = newWavetableSize;
+}
+
+//==============================================================================
 void PathSynthAudioProcessor::setPath(int numSamples)
 {
+    if (nextWavetableSize != wavetable.size())
+        wavetable.resize(nextWavetableSize);
+
     //todo check if it changed
     straightPath.clear();
 
@@ -497,15 +524,59 @@ void PathSynthAudioProcessor::setPath(int numSamples)
     straightPath.closeSubPath();
 
     processorPath = straightPath;
-    const auto smoothPathBounds = processorPath.getBounds();
+    //const auto smoothPathBounds = processorPath.getBounds();
     /*processorPath.applyTransform(
         AffineTransform::translation(
             -smoothPathBounds.getCentreX(),
             -smoothPathBounds.getCentreY()).followedBy(AffineTransform::scale(1.0f / smoothPathBounds.getWidth(),
                                                                               1.0f / smoothPathBounds.getHeight())));*/
+    const auto direction = *parameters.getRawParameterValue("direction");
 
     const auto smoothing = *parameters.getRawParameterValue("smoothing");
     processorPath = processorPath.createPathWithRoundedCorners(smoothing);
+
+    auto pathLengthOverWaveLength = processorPath.getLength() / wavetable.size();
+
+    PathFlatteningIterator iterator(processorPath);
+    iterator.next();
+
+    auto accumulatedDistance = 0.0f;
+    for (auto i = 0; i < wavetable.size(); ++i)
+    {
+        auto distanceFromStart = static_cast<float>(i) * pathLengthOverWaveLength;
+        if (i == 0)
+            distanceFromStart = (static_cast<float>(i) + 0.1f) * pathLengthOverWaveLength;
+
+        bool filledValue = false;
+        while (!filledValue)
+        {
+            const Line<float> line(iterator.x1, iterator.y1, iterator.x2, iterator.y2);
+            auto lineLength = line.getLength();
+            if (distanceFromStart <= lineLength + accumulatedDistance)
+            {
+                if (direction == 0)
+                    wavetable[i] = line.getPointAlongLine(distanceFromStart - accumulatedDistance).getX();
+                else
+                    wavetable[i] = line.getPointAlongLine(distanceFromStart - accumulatedDistance).getY();
+
+                jassert(!std::isnan(wavetable[i]));
+                filledValue = true;
+            }
+            else
+            {
+                accumulatedDistance += lineLength;
+                const auto moreToIterate = iterator.next();
+                if (!moreToIterate)
+                    break;
+            }
+        }
+        // if we reached the end of the path without finishing, use the final value
+        if (!filledValue)
+            if (direction == 0)
+                wavetable[i] = iterator.x2;
+            else
+                wavetable[i] = iterator.y2;
+    }
 }
 
 //==============================================================================

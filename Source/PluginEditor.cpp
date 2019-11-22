@@ -34,14 +34,27 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     oversamplingBox.addItem("2x", 2);
     oversamplingBox.addItem("4x", 4);
     oversamplingBox.addItem("8x", 8);
+    oversamplingBox.addItem("16x", 16);
     oversamplingBox.setSelectedId(processor.getOversampleFactor());
     oversamplingBox.addListener(this);
+
+    wavetableLabel.setText("Wavetable Size", dontSendNotification);
+    makeLabelUpperCase(wavetableLabel);
+    addAndMakeVisible(wavetableLabel);
+    addAndMakeVisible(wavetableBox);
+    for (int i = 4; i < 15; ++i)
+    {
+        int value = std::pow(2, i);
+        wavetableBox.addItem(String(value), value);
+    }
+    wavetableBox.setSelectedId(processor.getWavetableSize());
+    wavetableBox.addListener(this);
 
     voicesLabel.setText("Max Voices", dontSendNotification);
     makeLabelUpperCase(voicesLabel);
     addAndMakeVisible(voicesLabel);
     addAndMakeVisible(voicesSlider);
-    voicesSlider.setRange(1, 10, 1);
+    voicesSlider.setRange(1, PathSynthConstants::maxVoices, 1);
     voicesSlider.setValue(processor.getNumVoices());
     voicesSlider.addListener(this);
 
@@ -79,7 +92,7 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
     lookAndFeel.setColour(Slider::backgroundColourId, Colour(0xffdac9cb));
     lookAndFeel.setColour(Slider::thumbColourId, Colour(0xff98acb9));
     lookAndFeel.setColour(Slider::rotarySliderOutlineColourId, Colour(0xffdac9cb));
-     lookAndFeel.setColour(Slider::rotarySliderFillColourId, Colour(0xffa84350));
+    lookAndFeel.setColour(Slider::rotarySliderFillColourId, Colour(0xffa84350));
 
     lookAndFeel.setColour(ComboBox::backgroundColourId, Colour(0xffdcc296));
     lookAndFeel.setColour(ComboBox::textColourId, Colours::black);
@@ -92,7 +105,7 @@ PathSynthAudioProcessorEditor::PathSynthAudioProcessorEditor(PathSynthAudioProce
 
     setResizable(true, true);
     setResizeLimits(256, 256, 2048, 2048);
-    setSize(1024, 512);
+    setSize(885, 720);
 
     startTimer(100);
 }
@@ -144,23 +157,29 @@ void PathSynthAudioProcessorEditor::setLabelAreaAboveCentered(Label& label, Rect
 void PathSynthAudioProcessorEditor::resized()
 {
     auto area = getBounds();
+
     area.reduce(10, 10);
 
     auto titleArea = area.removeFromTop(32);
     titleArea.removeFromLeft(titlePath.getBounds().getWidth() + 10);
     nameLabel.setBounds(titleArea.removeFromLeft(100));
 
-    titleArea.removeFromLeft(titleArea.proportionOfWidth(0.25f));
+    // padding
+    titleArea.removeFromLeft(titleArea.proportionOfWidth(0.02f));
 
     auto voicesOversamplingArea = titleArea;
 
     voicesLabel.setBounds(
         voicesOversamplingArea.removeFromLeft(voicesLabel.getFont().getStringWidth(voicesLabel.getText())));
-    voicesSlider.setBounds(voicesOversamplingArea.removeFromLeft(voicesOversamplingArea.proportionOfWidth(0.5f)));
+    voicesSlider.setBounds(voicesOversamplingArea.removeFromLeft(voicesOversamplingArea.proportionOfWidth(0.25f)));
 
     oversamplingLabel.setBounds(
         voicesOversamplingArea.removeFromLeft(oversamplingLabel.getFont().getStringWidth(oversamplingLabel.getText())));
-    oversamplingBox.setBounds(voicesOversamplingArea);
+    oversamplingBox.setBounds(voicesOversamplingArea.removeFromLeft(voicesOversamplingArea.proportionOfWidth(0.25f)));
+
+    wavetableLabel.setBounds(
+        voicesOversamplingArea.removeFromLeft(wavetableLabel.getFont().getStringWidth(wavetableLabel.getText())));
+    wavetableBox.setBounds(voicesOversamplingArea);
 
     auto adsrBounds = area.removeFromTop(area.proportionOfHeight(0.1f));
     auto adsrWidth = adsrBounds.getWidth() / 4.0f;
@@ -186,7 +205,8 @@ void PathSynthAudioProcessorEditor::resized()
     auto belowPanels = area.removeFromBottom(64);
 
     auto outArea = belowPanels.removeFromRight(belowPanels.proportionOfWidth(0.25f));
-    outGainLabel.setBounds(outArea.removeFromLeft(1.2f*outGainLabel.getFont().getStringWidth(outGainLabel.getText())));
+    outGainLabel.
+        setBounds(outArea.removeFromLeft(1.2f * outGainLabel.getFont().getStringWidth(outGainLabel.getText())));
     outGainSlider.setBounds(outArea);
 
     auto directionArea = belowPanels.removeFromBottom(20);
@@ -225,4 +245,9 @@ void PathSynthAudioProcessorEditor::comboBoxChanged(ComboBox* comboBoxThatHasCha
     {
         processor.setOversampleFactor(oversamplingBox.getSelectedId());
     }
+    else if (comboBoxThatHasChanged == &wavetableBox)
+    {
+        processor.setWavetableSize(wavetableBox.getSelectedId());
+    }
+    //jassertfalse;
 }

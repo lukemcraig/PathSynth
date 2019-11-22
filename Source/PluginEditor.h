@@ -57,6 +57,9 @@ private:
     Label oversamplingLabel;
     ComboBox oversamplingBox;
 
+    Label wavetableLabel;
+    ComboBox wavetableBox;
+
     Label smoothLabel;
     Slider smoothSlider;
     std::unique_ptr<SliderAttachment> smoothAttachment;

@@ -13,4 +13,5 @@ struct PathSynthConstants
 {
 public:
     static constexpr int numControlPoints{16};
+    static constexpr int maxVoices{20};
 };

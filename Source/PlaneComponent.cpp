@@ -97,7 +97,7 @@ Path PlaneComponent::update()
 
     for (auto i = 1; i < controlPoints.size(); ++i)
     {
-        const auto pointBounds = controlPoints[i]->getBounds();
+        const auto pointBounds = controlPoints[controlPoints.size()-i]->getBounds();
         auto pointPosition = pointBounds.getPosition().toFloat();
         pointPosition.setX(pointPosition.getX() + (firstPointBounds.getWidth() * 0.5f));
         pointPosition.setY(pointPosition.getY() + (firstPointBounds.getHeight() * 0.5f));
