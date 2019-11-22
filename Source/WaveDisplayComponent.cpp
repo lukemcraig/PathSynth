@@ -58,9 +58,9 @@ void WaveDisplayComponent::update(Path smoothPath, const int direction)
     float t = 0.0f;
     signalPath.clear();
 
-    for (int i = 1; i <= getWidth(); ++i)
+    for (int i = 0; i < getWidth(); ++i)
     {
-        t = static_cast<float>(i) / getWidth();
+        t = (static_cast<float>(i)+0.01f) / getWidth();
         const auto point = smoothPath.getPointAlongPath(length * t);
         float pointValue;
         if (direction == 0)
@@ -68,7 +68,7 @@ void WaveDisplayComponent::update(Path smoothPath, const int direction)
         else
             pointValue = point.getY();
         pointValue = (pointValue * getHeight() * 0.5f) + (getHeight() * 0.5f);
-        if (i == 1)
+        if (i == 0)
             signalPath.startNewSubPath(0, pointValue);
         else
             signalPath.lineTo(i, pointValue);
