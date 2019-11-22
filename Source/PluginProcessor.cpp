@@ -20,7 +20,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     params.push_back(std::make_unique<AudioParameterChoice>("direction",
                                                             "Direction",
                                                             StringArray{"X", "Y"},
-                                                            0));
+                                                            1));
     params.push_back(std::make_unique<AudioParameterFloat>("outgain",
                                                            "Out Gain",
                                                            NormalisableRange<float>(0.0f,
@@ -43,9 +43,9 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     for (auto i = 0; i < PathSynthConstants::numControlPoints; ++i)
     {
         auto x = std::cos((static_cast<float>(i) / PathSynthConstants::numControlPoints)
-            * MathConstants<float>::twoPi) * .25f;
+            * MathConstants<float>::twoPi)*0.9f;
         auto y = std::sin((static_cast<float>(i) / PathSynthConstants::numControlPoints)
-            * MathConstants<float>::twoPi) * .25f;
+            * MathConstants<float>::twoPi)*0.9f;
 
         params.push_back(std::make_unique<AudioParameterFloat>("point" + String(i) + "x",
                                                                "Point" + String(i) + "_X",
