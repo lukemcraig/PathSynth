@@ -423,6 +423,7 @@ void PathSynthAudioProcessor::getStateInformation(MemoryBlock& destData)
     const auto xml(state.createXml());
     xml->setAttribute("maxVoices", numVoices);
     xml->setAttribute("oversampleFactor", oversampleFactor);
+    xml->setAttribute("wavetableSize", static_cast<int>(wavetable.size()));
     copyXmlToBinary(*xml, destData);
 }
 
@@ -440,6 +441,11 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
         {
             setOversampleFactor(xmlState->getIntAttribute("oversampleFactor", 4));
             xmlState->removeAttribute("oversampleFactor");
+        }
+        if (xmlState->hasAttribute("wavetableSize"))
+        {
+            setWavetableSize(xmlState->getIntAttribute("wavetableSize", 1024));
+            xmlState->removeAttribute("wavetableSize");
         }
         if (xmlState->hasTagName(parameters.state.getType()))
         {
