@@ -101,7 +101,7 @@ private:
 
     DcBlocker dcBlocker;
 
-    int nextWavetableSize{2048};
+    int nextWavetableSize{1024};
     std::vector<float> wavetable;
 
     //==============================================================================

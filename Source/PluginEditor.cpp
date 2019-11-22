@@ -157,8 +157,7 @@ void PathSynthAudioProcessorEditor::setLabelAreaAboveCentered(Label& label, Rect
 void PathSynthAudioProcessorEditor::resized()
 {
     auto area = getBounds();
-    DBG(area.getWidth());
-    DBG(area.getHeight());
+
     area.reduce(10, 10);
 
     auto titleArea = area.removeFromTop(32);

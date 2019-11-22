@@ -173,7 +173,7 @@ PathSynthAudioProcessor::PathSynthAudioProcessor(): AudioProcessor(
                                                                createParameterLayout()),
                                                     parameterVtsHelper(parameters)
 {
-    wavetable.resize(1024);
+    wavetable.resize(nextWavetableSize);
     for (auto i = 0; i < numVoices; ++i)
     {
         synthesiser.addVoice(new PathVoice(parameters, envParams, wavetable));
