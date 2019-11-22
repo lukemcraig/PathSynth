@@ -64,6 +64,7 @@ void PathVoice::updatePitchBend(int newPitchWheelValue)
 
 void PathVoice::updatePhaseIncrement()
 {
+    const auto frequencyOfA = *parameters.getRawParameterValue("frequencyOfA");
     const auto frequency = frequencyOfA * std::pow(2.0f, (currentNoteNumber + pitchBend - 69.0f) / 12.0f);
     phaseIncrement = frequency / getSampleRate();
 }

@@ -42,9 +42,6 @@ private:
     AudioProcessorValueTreeState& parameters;
     std::vector<float>& wavetable;
 
-    // todo parameterize
-    float frequencyOfA = 440.0f;
-
     int currentNoteNumber{};
     float pitchBend{};
     float phaseIncrement{};
