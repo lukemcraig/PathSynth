@@ -70,7 +70,7 @@ public:
 
     void setWavetableSize(int newWavetableSize);
 
-    int getWavetableSize() const { return wavetable.size(); }
+    int getWavetableSize() const { return static_cast<int>(wavetable.size()); }
 
     //==============================================================================
 private:

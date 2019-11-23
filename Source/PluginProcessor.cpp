@@ -581,11 +581,14 @@ void PathSynthAudioProcessor::setPath(int numSamples)
             }
         }
         // if we reached the end of the path without finishing, use the final value
-        if (!filledValue)
-            if (direction == 0)
+        if (!filledValue){
+            if (direction == 0){
                 wavetable[i] = iterator.x2;
-            else
+            }
+            else{
                 wavetable[i] = iterator.y2;
+            }
+        }
     }
 }
 
