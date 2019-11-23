@@ -96,7 +96,7 @@ private:
     hiir::Downsampler2xFpu<numCoeffs> downsampler4;
 
     static constexpr int maxOversampleFactor{16};
-    int oversampleFactor{2};
+    int oversampleFactor{8};
     AudioBuffer<float> oversampledBuffer;
 
     DcBlocker dcBlocker;

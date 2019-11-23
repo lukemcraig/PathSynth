@@ -449,7 +449,7 @@ void PathSynthAudioProcessor::setStateInformation(const void* data, int sizeInBy
         }
         if (xmlState->hasAttribute("oversampleFactor"))
         {
-            setOversampleFactor(xmlState->getIntAttribute("oversampleFactor", 4));
+            setOversampleFactor(xmlState->getIntAttribute("oversampleFactor", 8));
             xmlState->removeAttribute("oversampleFactor");
         }
         if (xmlState->hasAttribute("wavetableSize"))
