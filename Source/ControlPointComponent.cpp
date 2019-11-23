@@ -66,9 +66,15 @@ void ControlPointComponent::mouseDrag(const MouseEvent& event)
     dragger.dragComponent(this, event, &constrainer);
 
     const auto parentComponent = getParentComponent();
-    const auto newPosition = event.getEventRelativeTo(parentComponent).getPosition();
-    const auto newPositionX = static_cast<float>(newPosition.getX()) / static_cast<float>(parentComponent->getWidth());
-    const auto newPositionY = static_cast<float>(newPosition.getY()) / static_cast<float>(parentComponent->getHeight());
+    const auto newPosition = getBounds().getPosition();
+
+    auto newPositionX = static_cast<float>(newPosition.getX());
+    newPositionX += getBounds().getWidth() * 0.5f;
+    newPositionX /= static_cast<float>(parentComponent->getWidth());
+
+    auto newPositionY = static_cast<float>(newPosition.getY());
+    newPositionY += getBounds().getHeight() * 0.5f;
+    newPositionY /= static_cast<float>(parentComponent->getHeight());
 
     if (auto* p = parameters.getParameter("point" + String(index) + "x"))
     {
