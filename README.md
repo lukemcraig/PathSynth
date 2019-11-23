@@ -1,4 +1,4 @@
-#Path Synth
+# Path Synth
 
 A simple synthesizer where the oscillator is determined by a user-defined path.
 
