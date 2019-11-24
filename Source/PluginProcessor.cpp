@@ -341,22 +341,26 @@ void PathSynthAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
     oversampledBuffer.clear(0, 0, oversampledBuffer.getNumSamples());
 
     {
-        int numSamples = samplesPerSubBlock * oversampleFactor;
+        int numSamplesPerOversampledBlock = samplesPerSubBlock * oversampleFactor;
         int totalSamples = buffer.getNumSamples() * oversampleFactor;
-        for (int startSample = 0; startSample < totalSamples; startSample += numSamples)
-        {
-            setPath(numSamples);
+        int numWholeBlocks = totalSamples / numSamplesPerOversampledBlock;
 
-            keyboardState.processNextMidiBuffer(midiMessages, startSample, numSamples, true);
-            synthesiser.renderNextBlock(oversampledBuffer, midiMessages, startSample, numSamples);
+        for (int blockNum = 0; blockNum < numWholeBlocks; ++blockNum)
+        {
+            const int startSample = blockNum * numSamplesPerOversampledBlock;
+
+            setPath(numSamplesPerOversampledBlock);
+
+            keyboardState.processNextMidiBuffer(midiMessages, startSample, numSamplesPerOversampledBlock, true);
+            synthesiser.renderNextBlock(oversampledBuffer, midiMessages, startSample, numSamplesPerOversampledBlock);
         }
-        // in case the buffer didn't divide evenly. TODO double check this
-        const int numSamplesLeft = totalSamples % numSamples;
+        // in case the buffer didn't divide evenly.
+        const int numSamplesLeft = totalSamples - (numWholeBlocks * numSamplesPerOversampledBlock);
         if (numSamplesLeft > 0)
         {
             const int startSample = totalSamples - numSamplesLeft;
 
-            //setPath(numSamplesLeft);
+            setPath(numSamplesLeft);
 
             keyboardState.processNextMidiBuffer(midiMessages, startSample, numSamplesLeft, true);
             synthesiser.renderNextBlock(oversampledBuffer, midiMessages, startSample, numSamplesLeft);
@@ -581,11 +585,14 @@ void PathSynthAudioProcessor::setPath(int numSamples)
             }
         }
         // if we reached the end of the path without finishing, use the final value
-        if (!filledValue){
-            if (direction == 0){
+        if (!filledValue)
+        {
+            if (direction == 0)
+            {
                 wavetable[i] = iterator.x2;
             }
-            else{
+            else
+            {
                 wavetable[i] = iterator.y2;
             }
         }
