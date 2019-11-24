@@ -58,7 +58,28 @@ void ControlPointComponent::resized()
 
 void ControlPointComponent::mouseDown(const MouseEvent& event)
 {
+    if (auto* p = parameters.getParameter("point" + String(index) + "x"))
+    {
+        p->beginChangeGesture();
+    }
+    if (auto* p = parameters.getParameter("point" + String(index) + "y"))
+    {
+        p->beginChangeGesture();
+    }
+
     dragger.startDraggingComponent(this, event);
+}
+
+void ControlPointComponent::mouseUp(const MouseEvent& event)
+{
+    if (auto* p = parameters.getParameter("point" + String(index) + "x"))
+    {
+        p->endChangeGesture();
+    }
+    if (auto* p = parameters.getParameter("point" + String(index) + "y"))
+    {
+        p->endChangeGesture();
+    }
 }
 
 void ControlPointComponent::mouseDrag(const MouseEvent& event)
@@ -85,5 +106,29 @@ void ControlPointComponent::mouseDrag(const MouseEvent& event)
     {
         if (p->getValue() != newPositionY)
             p->setValueNotifyingHost(newPositionY);
+    }
+}
+
+void ControlPointComponent::mouseDoubleClick(const MouseEvent& event)
+{
+    if (auto* p = parameters.getParameter("point" + String(index) + "x"))
+    {
+        auto defaultValue = p->getDefaultValue();
+        if (p->getValue() != defaultValue)
+        {
+            p->beginChangeGesture();
+            p->setValueNotifyingHost(defaultValue);
+            p->endChangeGesture();
+        }
+    }
+    if (auto* p = parameters.getParameter("point" + String(index) + "y"))
+    {
+        auto defaultValue = p->getDefaultValue();
+        if (p->getValue() != defaultValue)
+        {
+            p->beginChangeGesture();
+            p->setValueNotifyingHost(defaultValue);
+            p->endChangeGesture();
+        }
     }
 }
